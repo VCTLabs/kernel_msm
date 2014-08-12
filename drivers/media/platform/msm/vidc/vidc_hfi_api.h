@@ -209,6 +209,11 @@ enum hal_property {
 	HAL_PARAM_VENC_SEARCH_RANGE,
 	HAL_PARAM_VPE_COLOR_SPACE_CONVERSION,
 	HAL_PARAM_VENC_VPX_ERROR_RESILIENCE_MODE,
+	HAL_PARAM_VDEC_NON_SECURE_OUTPUT2,
+	HAL_PARAM_VENC_H264_NAL_SVC_EXT,
+	HAL_CONFIG_VENC_PERF_MODE,
+	HAL_PARAM_VENC_HIER_B_MAX_ENH_LAYERS,
+	HAL_PARAM_VENC_HIER_P_HYBRID_MODE,
 };
 
 enum hal_domain {
@@ -833,6 +838,7 @@ enum hal_capability {
 	HAL_CAPABILITY_SCALE_X,
 	HAL_CAPABILITY_SCALE_Y,
 	HAL_CAPABILITY_BITRATE,
+	HAL_CAPABILITY_SECURE_OUTPUT2_THRESHOLD,
 	HAL_UNUSED_CAPABILITY = 0x10000000,
 };
 
@@ -1025,6 +1031,14 @@ struct hal_ltr_use {
 
 struct hal_ltr_mark {
 	u32 mark_frame;
+};
+
+struct hal_venc_perf_mode {
+	u32 mode;
+};
+
+struct hal_hybrid_hierp {
+	u32 layers;
 };
 
 struct hfi_scs_threshold {
@@ -1229,6 +1243,7 @@ struct vidc_hal_session_init_done {
 	struct hal_capability_supported bitrate;
 	struct hal_capability_supported hier_p;
 	struct hal_capability_supported ltr_count;
+	struct hal_capability_supported secure_output2_threshold;
 	struct hal_uncompressed_format_supported uncomp_format;
 	struct hal_interlace_format_supported HAL_format;
 	struct hal_nal_stream_format_supported nal_stream_format;
