@@ -64,4 +64,7 @@ void msm_hs_set_mctrl(struct uart_port *uport,
 				    unsigned int mctrl);
 int msm_hs_get_clock_state(struct uart_port *uport);
 void msm_hs_set_wake_peer(struct uart_port *uport, wake_peer_fn wake_peer);
+
+void msm_console_set_enable(bool enable);
+
 #endif
