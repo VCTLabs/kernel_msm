@@ -38,11 +38,13 @@
 #include <mach/msm_memtypes.h>
 #include <mach/msm_serial_hs.h>
 #include <linux/msm-bus.h>
+#include <soc/qcom/smem.h>
 #include <soc/qcom/smd.h>
 #include <soc/qcom/rpm-smd.h>
 #include <soc/qcom/spm.h>
 #include <soc/qcom/pm.h>
 #include <soc/qcom/socinfo.h>
+#include <soc/qcom/restart.h>
 #include "../board-dt.h"
 #include "../clock.h"
 #include "../platsmp.h"
@@ -115,9 +117,9 @@ void __init msm8974_add_drivers(void)
 {
 	msm_smd_init();
 	msm_rpm_driver_init();
+	msm_pm_sleep_status_init();
 	rpm_smd_regulator_driver_init();
 	msm_spm_device_init();
-	msm_pm_sleep_status_init();
 	krait_power_init();
 	spm_regulator_init();
 	msm_bus_fabric_init_driver();
@@ -188,14 +190,15 @@ void __init msm8974_init(void)
 	 * it will be enabled if detected earjack debugger
 	 */
 	msm_console_set_enable(false);
-
-	regulator_has_full_constraints();
 	board_dt_populate(adata);
+
+	msm_smem_init();
 
 	if (socinfo_init() < 0)
 		pr_err("%s: socinfo_init() failed\n", __func__);
 
 	msm_8974_init_gpiomux();
+	regulator_has_full_constraints();
 	msm8974_add_drivers();
 }
 
