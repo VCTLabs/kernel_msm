@@ -65,3 +65,5 @@ obj-$(CONFIG_QPNP_MISC) += qpnp-misc.o
 obj-$(CONFIG_APQ8084_DOCKING_STATION)	+= apq8084_dock.o
 obj-y				+= qcom/
 obj-$(CONFIG_MSM_PWM_VIBRATOR) += msm_pwm_vibrator.o
+obj-$(CONFIG_EARJACK_DEBUGGER) += earjack_debugger.o
+obj-$(CONFIG_FAN48632_BOOST) += fan48632_boost.o
