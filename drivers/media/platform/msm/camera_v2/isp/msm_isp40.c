@@ -1312,7 +1312,6 @@ static void msm_vfe40_update_camif_state(struct vfe_device *vfe_dev,
 	enum msm_isp_camif_update_state update_state)
 {
 	uint32_t val;
-	bool bus_en, vfe_en;
 	if (update_state == NO_UPDATE)
 		return;
 
@@ -1329,7 +1328,7 @@ static void msm_vfe40_update_camif_state(struct vfe_device *vfe_dev,
 			src_info[VFE_PIX_0].pix_stream_count > 0) ? 1 : 0);
 		val = msm_camera_io_r(vfe_dev->vfe_base + 0x2F8);
 		val &= 0xFFFFFF3F;
-		val = val | bus_en << 7 | vfe_en << 6;
+		val = val | 1 << 7 | 1 << 6;
 		msm_camera_io_w(val, vfe_dev->vfe_base + 0x2F8);
 		msm_camera_io_w_mb(0x4, vfe_dev->vfe_base + 0x2F4);
 		msm_camera_io_w_mb(0x1, vfe_dev->vfe_base + 0x2F4);
@@ -1400,10 +1399,8 @@ static void msm_vfe40_axi_cfg_wm_reg(
 		msm_camera_io_w(val, vfe_dev->vfe_base + wm_base + 0x14);
 
 		/*WR_BUFFER_CFG*/
-		val =
-			msm_isp_cal_word_per_line(stream_info->output_format,
-			stream_info->plane_cfg[
-				plane_idx].output_stride) << 16 |
+		val = (stream_info->plane_cfg[
+				plane_idx].output_stride/8) << 16 |
 			(stream_info->plane_cfg[
 				plane_idx].output_height - 1) << 4 |
 			burst_len;

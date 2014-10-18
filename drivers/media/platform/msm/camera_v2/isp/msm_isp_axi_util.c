@@ -1560,17 +1560,23 @@ static enum msm_isp_camif_update_state
 	int i;
 	struct msm_vfe_axi_stream *stream_info;
 	struct msm_vfe_axi_shared_data *axi_data = &vfe_dev->axi_data;
-	uint8_t pix_stream_cnt = 0, cur_pix_stream_cnt;
-	cur_pix_stream_cnt =
-		axi_data->src_info[VFE_PIX_0].pix_stream_count +
-		axi_data->src_info[VFE_PIX_0].raw_stream_count;
+	uint8_t pix_stream_cnt = 0, raw_stream_cnt = 0;
+	uint8_t cur_pix_stream_cnt, cur_raw_stream_cnt;
+	uint8_t stream_cnt, cur_stream_cnt;
+
+	cur_pix_stream_cnt = axi_data->src_info[VFE_PIX_0].pix_stream_count;
+	cur_raw_stream_cnt = axi_data->src_info[VFE_PIX_0].raw_stream_count;
+	cur_stream_cnt = cur_pix_stream_cnt + cur_raw_stream_cnt;
 	for (i = 0; i < stream_cfg_cmd->num_streams; i++) {
 		stream_info =
 			&axi_data->stream_info[
 			HANDLE_TO_IDX(stream_cfg_cmd->stream_handle[i])];
-		if (stream_info->stream_src  < RDI_INTF_0)
+		if (stream_info->stream_src < CAMIF_RAW)
 			pix_stream_cnt++;
+		else if (stream_info->stream_src < RDI_INTF_0)
+			raw_stream_cnt++;
 	}
+	stream_cnt = pix_stream_cnt + raw_stream_cnt;
 
 	if ((pix_stream_cnt) &&
 	    (axi_data->src_info[VFE_PIX_0].input_mux != EXTERNAL_READ)) {
@@ -1578,12 +1584,13 @@ static enum msm_isp_camif_update_state
 		if (cur_pix_stream_cnt == 0 && pix_stream_cnt &&
 			stream_cfg_cmd->cmd == START_STREAM)
 			return ENABLE_CAMIF;
-		else if (cur_pix_stream_cnt &&
-			(cur_pix_stream_cnt - pix_stream_cnt) == 0 &&
+		else if (cur_stream_cnt &&
+			(cur_stream_cnt - stream_cnt) == 0 &&
 			stream_cfg_cmd->cmd == STOP_STREAM)
 			return DISABLE_CAMIF;
-		else if (cur_pix_stream_cnt &&
+		else if ((cur_pix_stream_cnt || cur_raw_stream_cnt) &&
 			(cur_pix_stream_cnt - pix_stream_cnt) == 0 &&
+			(cur_raw_stream_cnt - raw_stream_cnt) == 0 &&
 			stream_cfg_cmd->cmd == STOP_IMMEDIATELY)
 			return DISABLE_CAMIF_IMMEDIATELY;
 	}
