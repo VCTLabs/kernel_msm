@@ -14,6 +14,7 @@ config ARCH_MSM8974
 	select MSM_MULTIMEDIA_USE_ION
 	select MSM_DEVFREQ_DEVBW
 	select DEVFREQ_SIMPLE_DEV
+	select MSM_DEVFREQ_CPUBW
 	select MSM_PIL
 	select MSM_SPM_V2
 	select MSM_L2_SPM

@@ -899,7 +899,6 @@ ipv6_add_addr(struct inet6_dev *idev, const struct in6_addr *addr, int pfxlen,
 	hash = inet6_addr_hash(addr);
 
 	hlist_add_head_rcu(&ifa->addr_lst, &inet6_addr_lst[hash]);
-	spin_unlock(&addrconf_hash_lock);
 
 	write_lock(&idev->lock);
 	/* Add to inet6_dev unicast addr list. */
@@ -914,6 +913,7 @@ ipv6_add_addr(struct inet6_dev *idev, const struct in6_addr *addr, int pfxlen,
 
 	in6_ifa_hold(ifa);
 	write_unlock(&idev->lock);
+	spin_unlock(&addrconf_hash_lock);
 out2:
 	rcu_read_unlock_bh();
 
