@@ -98,6 +98,7 @@
 #include "wlan_qct_wda.h"
 #include "vos_trace.h"
 #include "wlan_hdd_assoc.h"
+#include "adf_trace.h"
 
 #ifdef QCA_PKT_PROTO_TRACE
 #include "vos_packet.h"
@@ -322,7 +323,7 @@ static const hdd_freq_chan_map_t freq_chan_map[] = { {2412, 1}, {2417, 2},
 /* Private ioctls and their sub-ioctls */
 #define WLAN_PRIV_SET_THREE_INT_GET_NONE   (SIOCIWFIRSTPRIV + 4)
 #define WE_SET_WLAN_DBG      1
-/* 2 is unused */
+#define WE_SET_DP_TRACE      2
 #define WE_SET_SAP_CHANNELS  3
 
 /* Private ioctls and their sub-ioctls */
@@ -457,6 +458,8 @@ static const hdd_freq_chan_map_t freq_chan_map[] = { {2412, 1}, {2417, 2},
 #define WE_SET_FW_CRASH_INJECT    2
 #endif
 #define WE_SET_MON_MODE_CHAN 3
+#define WE_DUMP_DP_TRACE_LEVEL    4
+#define DUMP_DP_TRACE       0
 
 #define WLAN_STATS_INVALID            0
 #define WLAN_STATS_RETRY_CNT          1
@@ -2747,6 +2750,13 @@ static int __iw_set_genie(struct net_device *dev, struct iw_request_info *info,
         hddLog(VOS_TRACE_LEVEL_INFO, "%s: IE[0x%X], LEN[%d]",
             __func__, elementId, eLen);
 
+        if (remLen < eLen) {
+            hddLog(LOGE, "Remaining len: %u less than ie len: %u",
+                   remLen, eLen);
+            ret = -EINVAL;
+            goto exit;
+        }
+
         switch ( elementId )
          {
             case IE_EID_VENDOR:
@@ -2829,8 +2839,11 @@ static int __iw_set_genie(struct net_device *dev, struct iw_request_info *info,
                 hddLog (LOGE, "%s Set UNKNOWN IE %X",__func__, elementId);
                 goto exit;
     }
-        genie += eLen;
         remLen -= eLen;
+
+        /* Move genie only if next element is present */
+        if (remLen >= 2)
+            genie += eLen;
     }
 exit:
     EXIT();
@@ -7758,7 +7771,9 @@ static int __iw_set_three_ints_getnone(struct net_device *dev,
     case WE_SET_WLAN_DBG:
        vos_trace_setValue( value[1], value[2], value[3]);
        break;
-
+    case WE_SET_DP_TRACE:
+       adf_dp_trace_set_value(value[1], value[2], value[3]);
+       break;
     case WE_SET_SAP_CHANNELS:
         /* value[3] the acs band is not required as start and end channels are
          * enough but this cmd is maintained under set three ints for historic
@@ -9866,8 +9881,8 @@ void wlan_hdd_set_mc_addr_list(hdd_adapter_t *pAdapter, v_U8_t set)
                 for (i = 0; i < pAdapter->mc_addr_list.mc_cnt; i++)
                 {
                     memcpy(pMulticastAddrs->multicastAddr[i],
-                           pAdapter->mc_addr_list.addr[i],
-                           sizeof(pAdapter->mc_addr_list.addr[i]));
+                           &pAdapter->mc_addr_list.addr[i * ETH_ALEN],
+                           ETH_ALEN);
                     hddLog(VOS_TRACE_LEVEL_INFO,
                             "%s: %s multicast filter: addr ="
                             MAC_ADDRESS_STR,
@@ -9887,10 +9902,13 @@ void wlan_hdd_set_mc_addr_list(hdd_adapter_t *pAdapter, v_U8_t set)
             {
                 pMulticastAddrs->ulMulticastAddrCnt =
                                  pAdapter->mc_addr_list.mc_cnt;
-                for (i = 0; i < pAdapter->mc_addr_list.mc_cnt; i++) {
+                i = 0;
+                while (0 < pAdapter->mc_addr_list.mc_cnt) {
                     memcpy(pMulticastAddrs->multicastAddr[i],
-                           pAdapter->mc_addr_list.addr[i],
-                           sizeof(pAdapter->mc_addr_list.addr[i]));
+                           &pAdapter->mc_addr_list.addr[i * ETH_ALEN],
+                           ETH_ALEN);
+                    pAdapter->mc_addr_list.mc_cnt--;
+                    i++;
                     hddLog(VOS_TRACE_LEVEL_INFO,
                             "%s: clearing multicast filter: addr ="
                             MAC_ADDRESS_STR,
@@ -10932,7 +10950,14 @@ static int __iw_set_two_ints_getnone(struct net_device *dev,
             ret = -EINVAL;
         }
         break;
-
+    case WE_DUMP_DP_TRACE_LEVEL:
+        hddLog(LOG1, "WE_DUMP_DP_TRACE_LEVEL: %d %d",
+                       value[1], value[2]);
+        if (value[1] == DUMP_DP_TRACE)
+            adf_dp_trace_dump_all(value[2]);
+        else
+            hddLog(LOGE, "unexpected value for dump_dp_trace");
+        break;
     default:
         hddLog(LOGE, "%s: Invalid IOCTL command %d", __func__, sub_cmd);
         break;
@@ -11808,6 +11833,12 @@ static const struct iw_priv_args we_private_args[] = {
         0,
         "setwlandbg" },
 
+    /* handlers for sub-ioctl */
+    {   WE_SET_DP_TRACE,
+        IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 3,
+        0,
+        "set_dp_trace"},
+
     {   WE_SET_SAP_CHANNELS,
         IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 3,
         0,
@@ -12126,6 +12157,9 @@ static const struct iw_priv_args we_private_args[] = {
     {   WE_SET_MON_MODE_CHAN,
         IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 2,
         0, "setMonChan" },
+    {   WE_DUMP_DP_TRACE_LEVEL,
+        IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 2,
+        0, "dump_dp_trace"},
 };
 
 
