@@ -92,6 +92,7 @@ extern int process_wma_set_command(int sessid, int paramid,
 #include "wlan_hdd_trace.h"
 #include "vos_types.h"
 #include "vos_trace.h"
+#include "adf_trace.h"
 #include "wlan_hdd_cfg.h"
 #include <wlan_hdd_wowl.h>
 #include "wlan_hdd_tsf.h"
@@ -118,6 +119,8 @@ extern int process_wma_set_command(int sessid, int paramid,
 
 /* EID byte + length byte + four byte WiFi OUI */
 #define DOT11F_EID_HEADER_LEN (6)
+
+#define DUMP_DP_TRACE       0
 
 /*---------------------------------------------------------------------------
  *   Function definitions
@@ -1823,21 +1826,27 @@ VOS_STATUS hdd_hostapd_SAPEventCB( tpSap_Event pSapEvent, v_PVOID_t usrDataForCa
                                           HDD_SAP_WAKE_LOCK_DURATION,
                                           WIFI_POWER_EVENT_WAKELOCK_SAP);
             {
-               struct station_info staInfo;
                v_U16_t iesLen =  pSapEvent->sapevt.sapStationAssocReassocCompleteEvent.iesLen;
 
-               memset(&staInfo, 0, sizeof(staInfo));
                if (iesLen <= MAX_ASSOC_IND_IE_LEN )
                {
-                  staInfo.assoc_req_ies =
+                  struct station_info *stainfo;
+                  stainfo = vos_mem_malloc(sizeof(*stainfo));
+                  if (stainfo == NULL) {
+                      hddLog(LOGE, FL("alloc station_info failed"));
+                      return VOS_STATUS_E_NOMEM;
+                  }
+                  memset(stainfo, 0, sizeof(*stainfo));
+                  stainfo->assoc_req_ies =
                      (const u8 *)&pSapEvent->sapevt.sapStationAssocReassocCompleteEvent.ies[0];
-                  staInfo.assoc_req_ies_len = iesLen;
+                  stainfo->assoc_req_ies_len = iesLen;
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,31)) || defined(WITH_BACKPORTS)
-                  staInfo.filled |= STATION_INFO_ASSOC_REQ_IES;
+                  stainfo->filled |= STATION_INFO_ASSOC_REQ_IES;
 #endif
                   cfg80211_new_sta(dev,
                         (const u8 *)&pSapEvent->sapevt.sapStationAssocReassocCompleteEvent.staMac.bytes[0],
-                        &staInfo, GFP_KERNEL);
+                        stainfo, GFP_KERNEL);
+                  vos_mem_free(stainfo);
                }
                else
                {
@@ -2580,6 +2589,14 @@ static int __iw_softap_set_two_ints_getnone(struct net_device *dev,
                                            value[1], value[2], GEN_CMD);
         break;
 #endif
+    case QCSAP_IOCTL_DUMP_DP_TRACE_LEVEL:
+        hddLog(LOG1, "WE_DUMP_DP_TRACE: %d %d",
+            value[1], value[2]);
+        if (value[1] == DUMP_DP_TRACE)
+            adf_dp_trace_dump_all(value[2]);
+        else
+            hddLog(LOGE, "unexpected value for dump_dp_trace");
+        break;
     default:
         hddLog(LOGE, "%s: Invalid IOCTL command %d", __func__, sub_cmd);
         break;
@@ -5484,6 +5501,13 @@ static int __iw_set_ap_genie(struct net_device *dev,
         return 0;
     }
 
+    if (wrqu->data.length > DOT11F_IE_RSN_MAX_LEN) {
+       VOS_TRACE(VOS_MODULE_ID_HDD, VOS_TRACE_LEVEL_ERROR,
+               "%s: WPARSN Ie input length is more than max[%d]", __func__,
+                wrqu->data.length);
+       return -EINVAL;
+    }
+
     switch (genie[0])
     {
         case DOT11F_EID_WPA:
@@ -6306,7 +6330,7 @@ static const struct iw_priv_args hostapd_private_args[] = {
   { QCSAP_IOCTL_STOPBSS,
       IW_PRIV_TYPE_BYTE | IW_PRIV_SIZE_FIXED, 0, "stopbss" },
   { QCSAP_IOCTL_VERSION, 0,
-      IW_PRIV_TYPE_CHAR | QCSAP_MAX_WSC_IE, "version" },
+      IW_PRIV_TYPE_CHAR | WE_MAX_STR_LEN, "version" },
   { QCSAP_IOCTL_GET_STA_INFO, 0,
       IW_PRIV_TYPE_CHAR | WE_SAP_MAX_STA_INFO, "get_sta_info" },
   { QCSAP_IOCTL_GET_WPS_PBC_PROBE_REQ_IES,
@@ -6341,6 +6365,12 @@ static const struct iw_priv_args hostapd_private_args[] = {
        IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 3,
        0,
        "setsapchannels" },
+
+   /* handlers for sub-ioctl */
+   {  WE_SET_DP_TRACE,
+      IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 3,
+      0,
+      "set_dp_trace" },
 
    /* handlers for main ioctl */
    {   QCSAP_IOCTL_PRIV_SET_VAR_INT_GET_NONE,
@@ -6459,6 +6489,11 @@ static const struct iw_priv_args hostapd_private_args[] = {
     {   QCASAP_SET_RADAR_DBG,
         IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1,
         0,  "setRadarDbg" },
+
+    /* dump dp trace - descriptor or dp trace records */
+    {   QCSAP_IOCTL_DUMP_DP_TRACE_LEVEL,
+        IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 2,
+        0, "dump_dp_trace" },
 };
 
 static const iw_handler hostapd_private[] = {
