@@ -28,6 +28,9 @@
 #include <crypto/authenc.h>
 #include <crypto/scatterwalk.h>
 
+/* not yet defined in crypto headers*/
+#define U32_MAX				((u32)~0U)
+
 /* SHA digest size  in bytes */
 #define SHA256_DIGESTSIZE		32
 #define SHA1_DIGESTSIZE			20

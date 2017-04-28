@@ -28,6 +28,7 @@
 #include <linux/regulator/rpm-smd-regulator.h>
 #include <linux/regulator/spm-regulator.h>
 #include <linux/clk/msm-clk-provider.h>
+#include <linux/platform_data/msm_serial_hs.h>
 #include <asm/mach/map.h>
 #include <asm/mach/map.h>
 #include <asm/mach/arch.h>
@@ -36,7 +37,6 @@
 #include <mach/gpiomux.h>
 #include <mach/msm_iomap.h>
 #include <mach/msm_memtypes.h>
-#include <mach/msm_serial_hs.h>
 #include <linux/msm-bus.h>
 #include <soc/qcom/smem.h>
 #include <soc/qcom/smd.h>
@@ -198,7 +198,6 @@ void __init msm8974_init(void)
 		pr_err("%s: socinfo_init() failed\n", __func__);
 
 	msm_8974_init_gpiomux();
-	regulator_has_full_constraints();
 	msm8974_add_drivers();
 }
 
@@ -217,6 +216,6 @@ DT_MACHINE_START(MSM8974_DT, "Qualcomm MSM 8974 HAMMERHEAD (Flattened Device Tre
 	.init_machine = msm8974_init,
 	.dt_compat = msm8974_dt_match,
 	.reserve = msm_8974_reserve,
-	.init_very_early = msm8974_init_very_early,
+	.init_early = msm8974_init_very_early,
 	.smp = &msm8974_smp_ops,
 MACHINE_END
