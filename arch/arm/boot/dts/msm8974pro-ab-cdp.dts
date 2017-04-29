@@ -12,8 +12,8 @@
 
 /dts-v1/;
 
-/include/ "msm8974pro-ab.dtsi"
-/include/ "msm8974-cdp.dtsi"
+#include "msm8974pro-ab.dtsi"
+#include "msm8974-cdp.dtsi"
 
 / {
 	model = "Qualcomm MSM 8974Pro CDP";

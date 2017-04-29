@@ -16,4 +16,4 @@
  * msm8974.dtsi / msm8974pro.dtsi file(s).
  */
 
-/include/ "msm8974pro.dtsi"
+#include "msm8974pro.dtsi"

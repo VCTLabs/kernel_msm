@@ -16,10 +16,10 @@
  * msm8974.dtsi file.
  */
 
-/include/ "msm8974.dtsi"
-/include/ "msm8974-v1-iommu.dtsi"
-/include/ "msm8974-v1-iommu-domains.dtsi"
-/include/ "msm8974-v1-pm.dtsi"
+#include "msm8974.dtsi"
+#include "msm8974-v1-iommu.dtsi"
+#include "msm8974-v1-iommu-domains.dtsi"
+#include "msm8974-v1-pm.dtsi"
 
 &soc {
 	android_usb@fc42b0c8 {
