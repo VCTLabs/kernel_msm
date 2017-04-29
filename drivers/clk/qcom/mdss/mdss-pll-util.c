@@ -180,7 +180,7 @@ static int mdss_pll_util_parse_dt_supply(struct platform_device *pdev,
 			pr_err(": error reading enable load. rc=%d\n", rc);
 			goto error;
 		}
-		mp->vreg_config[i].enable_load = tmp;
+		mp->vreg_config[i].load[DSS_REG_MODE_ENABLE] = tmp;
 
 		rc = of_property_read_u32(supply_node,
 					"qcom,supply-disable-load", &tmp);
@@ -188,7 +188,7 @@ static int mdss_pll_util_parse_dt_supply(struct platform_device *pdev,
 			pr_err(": error reading disable load. rc=%d\n", rc);
 			goto error;
 		}
-		mp->vreg_config[i].disable_load = tmp;
+		mp->vreg_config[i].load[DSS_REG_MODE_DISABLE] = tmp;
 
 		rc = of_property_read_u32(supply_node,
 					"qcom,supply-pre-on-sleep", &tmp);
@@ -226,8 +226,8 @@ static int mdss_pll_util_parse_dt_supply(struct platform_device *pdev,
 					mp->vreg_config[i].vreg_name,
 					mp->vreg_config[i].min_voltage,
 					mp->vreg_config[i].max_voltage,
-					mp->vreg_config[i].enable_load,
-					mp->vreg_config[i].disable_load,
+					mp->vreg_config[i].load[DSS_REG_MODE_ENABLE],
+					mp->vreg_config[i].load[DSS_REG_MODE_DISABLE],
 					mp->vreg_config[i].pre_on_sleep,
 					mp->vreg_config[i].post_on_sleep,
 					mp->vreg_config[i].pre_off_sleep,
