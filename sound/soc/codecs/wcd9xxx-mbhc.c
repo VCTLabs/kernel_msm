@@ -71,6 +71,7 @@
 #define BTN_RELEASE_DEBOUNCE_TIME_MS 25
 
 #define GND_MIC_SWAP_THRESHOLD 2
+#define HIGH_HPH_THRESHOLD 5
 #define OCP_ATTEMPT 1
 
 #define FW_READ_ATTEMPTS 15
@@ -99,7 +100,7 @@
  * Invalid voltage range for the detection
  * of plug type with current source
  */
-#define WCD9XXX_CS_MEAS_INVALD_RANGE_LOW_MV 160
+#define WCD9XXX_CS_MEAS_INVALD_RANGE_LOW_MV 230
 #define WCD9XXX_CS_MEAS_INVALD_RANGE_HIGH_MV 265
 
 /*
@@ -120,7 +121,7 @@
 #define WCD9XXX_WG_TIME_FACTOR_US	240
 
 #define WCD9XXX_V_CS_HS_MAX 500
-#define WCD9XXX_V_CS_NO_MIC 5
+#define WCD9XXX_V_CS_NO_MIC 15
 #define WCD9XXX_MB_MEAS_DELTA_MAX_MV 80
 #define WCD9XXX_CS_MEAS_DELTA_MAX_MV 12
 
@@ -480,7 +481,7 @@ void *wcd9xxx_mbhc_cal_btn_det_mp(
 			    const struct wcd9xxx_mbhc_btn_detect_cfg *btn_det,
 			    const enum wcd9xxx_mbhc_btn_det_mem mem)
 {
-	void *ret = &btn_det->_v_btn_low;
+	void *ret = (void *)&btn_det->_v_btn_low;
 
 	switch (mem) {
 	case MBHC_BTN_DET_GAIN:

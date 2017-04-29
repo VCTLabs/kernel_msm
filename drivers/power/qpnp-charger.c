@@ -794,14 +794,13 @@ qpnp_is_dc_higher_prio(struct qpnp_chg_chip *chip)
 	int rc;
 	u8 usb_ctl;
 
-	if (!chip->type == SMBB)
-		return false;
-
-	rc = qpnp_chg_read(chip, &usb_ctl,
-			chip->usb_chgpth_base + USB_CHGPTH_CTL, 1);
-	if (rc) {
-		pr_err("failed to read usb ctl rc=%d\n", rc);
-		return 0;
+	if (chip->type == SMBB) {
+		rc = qpnp_chg_read(chip, &usb_ctl,
+				chip->usb_chgpth_base + USB_CHGPTH_CTL, 1);
+		if (rc) {
+			pr_err("failed to read usb ctl rc=%d\n", rc);
+			return 0;
+		}
 	}
 
 	return !!(usb_ctl & DC_HIGHER_PRIORITY);
