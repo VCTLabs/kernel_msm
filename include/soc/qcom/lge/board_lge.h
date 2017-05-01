@@ -14,6 +14,7 @@
 #define __ASM_ARCH_MSM_BOARD_LGE_H
 
 enum hw_rev_type {
+	HW_REV_UNKNOWN = 0,
 	HW_REV_EVB1 = 0,
 	HW_REV_EVB2,
 	HW_REV_EVB3,
@@ -25,11 +26,31 @@ enum hw_rev_type {
 	HW_REV_E,
 	HW_REV_F,
 	HW_REV_G,
+	HW_REV_H,
 	HW_REV_1_0,
 	HW_REV_1_1,
 	HW_REV_1_2,
 	HW_REV_MAX
 };
+
+enum lge_boot_mode_type {
+	LGE_BOOT_MODE_NORMAL = 0,
+	LGE_BOOT_MODE_CHARGER,
+	LGE_BOOT_MODE_CHARGERLOGO,
+	LGE_BOOT_MODE_FACTORY,
+	LGE_BOOT_MODE_FACTORY2,
+	LGE_BOOT_MODE_PIFBOOT
+};
+
+enum lge_boot_mode_type lge_get_boot_mode(void);
+
+#define UART_MODE_ALWAYS_OFF_BMSK   BIT(0)
+#define UART_MODE_ALWAYS_ON_BMSK    BIT(1)
+#define UART_MODE_INIT_BMSK         BIT(2)
+#define UART_MODE_EN_BMSK           BIT(3)
+
+extern unsigned int lge_get_uart_mode(void);
+extern void lge_set_uart_mode(unsigned int um);
 
 extern char *rev_str[];
 
