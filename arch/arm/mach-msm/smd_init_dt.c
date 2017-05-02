@@ -19,9 +19,9 @@
 #include <linux/of_irq.h>
 #include <linux/interrupt.h>
 #include <linux/io.h>
-
 #include <mach/msm_ipc_logging.h>
-#include <smd_private.h>
+
+#include "smd_private.h"
 
 #define MODULE_NAME "msm_smd"
 #define IPC_LOG(level, x...) do { \
