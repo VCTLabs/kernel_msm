@@ -584,6 +584,8 @@ int audio_aio_release(struct inode *inode, struct file *file)
 	wake_up(&audio->event_wait);
 	audio_aio_reset_event_queue(audio);
 	q6asm_audio_client_free(audio->ac);
+	mutex_unlock(&audio->write_lock);
+	mutex_unlock(&audio->read_lock);
 	mutex_unlock(&audio->lock);
 	mutex_destroy(&audio->lock);
 	mutex_destroy(&audio->read_lock);
@@ -1679,7 +1681,11 @@ static long audio_aio_ioctl(struct file *file, unsigned int cmd,
 				__func__);
 			rc = -EFAULT;
 		} else {
+			mutex_lock(&audio->read_lock);
+			mutex_lock(&audio->write_lock);
 			rc = audio_aio_ion_add(audio, &info);
+			mutex_unlock(&audio->write_lock);
+			mutex_unlock(&audio->read_lock);
 		}
 		mutex_unlock(&audio->lock);
 		break;
@@ -1694,7 +1700,11 @@ static long audio_aio_ioctl(struct file *file, unsigned int cmd,
 				__func__);
 			rc = -EFAULT;
 		} else {
+			mutex_lock(&audio->read_lock);
+			mutex_lock(&audio->write_lock);
 			rc = audio_aio_ion_remove(audio, &info);
+			mutex_unlock(&audio->write_lock);
+			mutex_unlock(&audio->read_lock);
 		}
 		mutex_unlock(&audio->lock);
 		break;
