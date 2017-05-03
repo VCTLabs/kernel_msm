@@ -4721,7 +4721,7 @@ select_task_rq_fair(struct task_struct *p, int sd_flag, int wake_flags)
 		return prev_cpu;
 
 	if (sched_enable_hmp)
-		return select_best_cpu(p, prev_cpu, 0, sync);
+		return select_best_cpu(p, prev_cpu, 0);
 
 	if (sd_flag & SD_BALANCE_WAKE) {
 		if (cpumask_test_cpu(cpu, tsk_cpus_allowed(p)))
