@@ -40,7 +40,7 @@ endmenu
 
 menu "LGE Specific Patches"
 config LGE_HANDLE_PANIC
-	tristate "Support LGE Kernel Panic Handler"
+	bool "Support LGE Kernel Panic Handler"
 	default n
 	depends on MACH_LGE
 	help
