@@ -31,6 +31,7 @@
 #include <linux/compiler.h>
 #include <linux/sort.h>
 #include <linux/dma-mapping.h>
+#include <linux/persistent_ram.h>
 
 #include <asm/unified.h>
 #include <asm/cp15.h>
@@ -824,6 +825,33 @@ static void __init reserve_crashkernel(void)
 }
 #else
 static inline void reserve_crashkernel(void) {}
+
+struct persistent_ram_descriptor ram_console_desc = {
+	.name = "qcom,ram-console.40",
+	.size = 0x20000,
+};
+struct persistent_ram ram_console_ram = {
+	.start = 0xFF00000,
+	.size = 0x20000,
+	.num_descs = 1,
+	.descs = &ram_console_desc,
+};
+
+static void __init reserve_crashkernel_1(void)
+{
+	int ret;
+
+	ret = reserve_bootmem(ram_console_ram.start, ram_console_ram.size, BOOTMEM_EXCLUSIVE);
+	if (ret < 0) {
+		printk("crashkernel reservation failed - memory is in use (0x%lx)\n", (unsigned long)ram_console_ram.start);
+		return;
+	}
+	persistent_ram_early_init(&ram_console_ram);
+	printk("Reserve memory base (0x%lx); size (0x%lx) \r\n", (unsigned long)ram_console_ram.start, (unsigned long)ram_console_ram.size);
+	return;
+
+}
+
 #endif /* CONFIG_KEXEC */
 
 void __init hyp_mode_check(void)
@@ -898,7 +926,7 @@ void __init setup_arch(char **cmdline_p)
 	if (!is_smp())
 		hyp_mode_check();
 
-	reserve_crashkernel();
+	reserve_crashkernel_1();
 
 #ifdef CONFIG_MULTI_IRQ_HANDLER
 	handle_arch_irq = mdesc->handle_irq;
