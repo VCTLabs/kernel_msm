@@ -162,6 +162,9 @@ static struct qpnp_vadc_scale_fn vadc_scale_fn[] = {
 	[SCALE_QRD_SKUH_BATT_THERM] = {qpnp_adc_scale_qrd_skuh_batt_therm},
 	[SCALE_NCP_03WF683_THERM] = {qpnp_adc_scale_therm_ncp03},
 };
+#ifdef CONFIG_TCMD
+struct qpnp_vadc_chip *vchip;
+#endif
 
 static struct qpnp_vadc_rscale_fn adc_vadc_rscale_fn[] = {
 	[SCALE_RVADC_ABSOLUTE] = {qpnp_vadc_absolute_rthr},
@@ -2232,6 +2235,9 @@ static int qpnp_vadc_probe(struct spmi_device *spmi)
 	dev_set_drvdata(&spmi->dev, vadc);
 	list_add(&vadc->list, &qpnp_vadc_device_list);
 
+#ifdef CONFIG_TCMD
+	vchip = vadc;
+#endif
 	return 0;
 
 err_setup:
