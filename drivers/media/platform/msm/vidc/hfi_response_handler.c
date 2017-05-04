@@ -691,7 +691,7 @@ static void hfi_process_sess_get_prop_profile_level(
 	dprintk(VIDC_DBG, "Entered %s\n", __func__);
 	if (!prop) {
 		dprintk(VIDC_ERR,
-			"hal_process_sess_get_profile_level: bad_prop: %p\n",
+			"hal_process_sess_get_profile_level: bad_prop: %pK\n",
 			prop);
 		return;
 	}
@@ -915,7 +915,7 @@ static void hfi_process_session_init_done(
 			pkt, &session_init_done);
 	} else {
 		dprintk(VIDC_WARN,
-			"Sess init failed: 0x%p, 0x%p\n",
+			"Sess init failed: 0x%p, 0x%pK\n",
 			session->session_id, session);
 	}
 	cmd_done.size = sizeof(struct vidc_hal_session_init_done);

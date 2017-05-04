@@ -52,7 +52,7 @@ static void vpe_mem_dump(const char * const name, const void * const addr,
 	int i;
 	u32 *p = (u32 *) addr;
 	u32 data;
-	VPE_DBG("%s: (%s) %p %d\n", __func__, name, addr, size);
+	VPE_DBG("%s: (%s) %pK %d\n", __func__, name, addr, size);
 	line_str[0] = '\0';
 	p_str = line_str;
 	for (i = 0; i < size/4; i++) {

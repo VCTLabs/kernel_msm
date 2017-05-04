@@ -1448,7 +1448,7 @@ int msm_isp_axi_reset(struct vfe_device *vfe_dev,
 		bufq = vfe_dev->buf_mgr->ops->get_bufq(vfe_dev->buf_mgr,
 			stream_info->bufq_handle);
 		if (!bufq) {
-			pr_err("%s: bufq null %p by handle %x\n", __func__,
+			pr_err("%s: bufq null %pK by handle %x\n", __func__,
 				bufq, stream_info->bufq_handle);
 			continue;
 		}

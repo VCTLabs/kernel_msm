@@ -1137,7 +1137,7 @@ static int cpp_open_node(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh)
 	CPP_DBG("E\n");
 
 	if (!sd || !fh) {
-		pr_err("Wrong input parameters sd %p fh %p!",
+		pr_err("Wrong input parameters sd %pK fh %p!",
 			sd, fh);
 		return -EINVAL;
 	}
@@ -1417,7 +1417,7 @@ static void msm_cpp_do_timeout_work(struct work_struct *work)
 	pr_info("cpp_timer_callback called. (jiffies=%lu)\n",
 		jiffies);
 	if (!work || cpp_timer.data.cpp_dev->state != CPP_STATE_ACTIVE) {
-		pr_err("Invalid work:%p or state:%d\n", work,
+		pr_err("Invalid work:%pK or state:%d\n", work,
 			cpp_timer.data.cpp_dev->state);
 		return;
 	}
@@ -2558,7 +2558,7 @@ static long msm_cpp_subdev_fops_compat_ioctl(struct file *file,
 	}
 	cpp_dev = v4l2_get_subdevdata(sd);
 	if (!vdev || !cpp_dev) {
-		pr_err("Invalid vdev %p or cpp_dev %p structures!",
+		pr_err("Invalid vdev %pK or cpp_dev %pK structures!",
 			vdev, cpp_dev);
 		return -EINVAL;
 	}
