@@ -310,7 +310,7 @@ kgsl_mem_entry_track_gpuaddr(struct kgsl_process_private *process,
 				struct kgsl_mem_entry *entry)
 {
 	int ret = 0;
-	struct kgsl_pagetable *pagetable = process->pagetable;
+//	struct kgsl_pagetable *pagetable = process->pagetable;
 	size_t size = entry->memdesc.size;
 
 	assert_spin_locked(&process->mem_lock);
@@ -4167,7 +4167,7 @@ static int kgsl_check_gpu_addr_collision(
 			spin_lock(&private->mem_lock);
 			kgsl_mem_entry_untrack_gpuaddr(private, entry);
 			spin_unlock(&private->mem_lock);
-		else {
+		} else {
 			/* Insert mem entry in mem_rb tree */
 			spin_lock(&private->mem_lock);
 			kgsl_mem_entry_commit_mem_list(private, entry);

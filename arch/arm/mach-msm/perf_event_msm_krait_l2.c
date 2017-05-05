@@ -26,7 +26,6 @@
  */
 struct pmu_constraints {
 	u64 pmu_bitmap;
-	u8 codes[64];
 	u8 codes[PMU_CODES_SIZE];
 	raw_spinlock_t lock;
 } l2_pmu_constraints = {

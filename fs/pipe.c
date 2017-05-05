@@ -164,8 +164,6 @@ pipe_iov_copy_to_user(struct iovec *iov, void *addr, int *offset,
 					 addr + *offset, copy))
 				return -EFAULT;
 		}
-		from += copy;
-		len -= copy;
 		*offset += copy;
 		*remaining -= copy;
 		iov->iov_base += copy;
@@ -541,6 +539,7 @@ pipe_write(struct kiocb *iocb, const struct iovec *_iov,
 		if (ops->can_merge && offset + chars <= PAGE_SIZE) {
 			int error, atomic = 1;
 			void *addr;
+			size_t remaining = chars;
 
 			error = ops->confirm(pipe, buf);
 			if (error)

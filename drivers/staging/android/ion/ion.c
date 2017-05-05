@@ -400,7 +400,7 @@ static void ion_handle_get(struct ion_handle *handle)
 	kref_get(&handle->ref);
 }
 
-+static int ion_handle_put_nolock(struct ion_handle *handle)
+static int ion_handle_put_nolock(struct ion_handle *handle)
 {
 	int ret;
 	ret = kref_put(&handle->ref, ion_handle_destroy);
@@ -448,7 +448,7 @@ static struct ion_handle *ion_handle_get_by_id_nolock(struct ion_client *client,
 	return handle ? handle : ERR_PTR(-EINVAL);
 }
 
-+struct ion_handle *ion_handle_get_by_id(struct ion_client *client,
+struct ion_handle *ion_handle_get_by_id(struct ion_client *client,
                         int id)
 {
 	struct ion_handle *handle;
@@ -1434,7 +1434,7 @@ static long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		struct ion_handle *handle;
 
 		mutex_lock(&client->lock);
-		handle = ion_handle_get_by_id_nolock(client, (int)data.handle);
+		handle = ion_handle_get_by_id_nolock(client, data.handle.handle);
 		if (IS_ERR(handle)) {
 			mutex_unlock(&client->lock);
 			return PTR_ERR(handle);

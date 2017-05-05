@@ -151,10 +151,6 @@ static int mdss_dsi_panel_power_on(struct mdss_panel_data *pdata)
 			goto error;
 		}
 
-		if (synaptics_touch_bdata && (synaptics_touch_bdata->reset_gpio >= 0)) {
-			gpio_set_value(synaptics_touch_bdata->reset_gpio, !synaptics_touch_bdata->reset_on_state);
-			msleep(synaptics_touch_bdata->reset_delay_ms);
-		}
 	}
 	if (ctrl_pdata->panel_bias_vreg) {
 		pr_debug("%s: Enable panel bias vreg. ndx = %d\n",
@@ -189,17 +185,20 @@ static int mdss_dsi_panel_power_on(struct mdss_panel_data *pdata)
 		if (pdata->panel_info.mipi.has_tps65132)
 			tps65132_config_proc();
 #endif
+		if (synaptics_touch_bdata && (synaptics_touch_bdata->reset_gpio >= 0)) {
+			gpio_set_value(synaptics_touch_bdata->reset_gpio, !synaptics_touch_bdata->reset_on_state);
+			msleep(synaptics_touch_bdata->reset_delay_ms);
+		}
+	}
+
+	if (synaptics_touch_bdata && (synaptics_touch_bdata->reset_gpio >= 0)) {
+		gpio_set_value(synaptics_touch_bdata->reset_gpio, synaptics_touch_bdata->reset_on_state);
+		msleep(synaptics_touch_bdata->reset_active_ms);
 	}
 
 error:
 	if (ret) {
 		for (; i >= 0; i--)
-
-			if (synaptics_touch_bdata && (synaptics_touch_bdata->reset_gpio >= 0)) {
-				gpio_set_value(synaptics_touch_bdata->reset_gpio, synaptics_touch_bdata->reset_on_state);
-				msleep(synaptics_touch_bdata->reset_active_ms);
-			}
-
 			msm_dss_enable_vreg(
 				ctrl_pdata->power_data[i].vreg_config,
 				ctrl_pdata->power_data[i].num_vreg, 0);
