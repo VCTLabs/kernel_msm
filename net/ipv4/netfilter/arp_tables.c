@@ -516,7 +516,7 @@ find_check_entry(struct arpt_entry *e, const char *name, unsigned int size)
 	struct xt_target *target;
 	int ret;
 
-	ret = check_entry(e, name);
+	ret = check_entry(e);
 	if (ret)
 		return ret;
 
