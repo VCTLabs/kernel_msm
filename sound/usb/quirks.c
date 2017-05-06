@@ -158,9 +158,8 @@ static int create_fixed_stream_quirk(struct snd_usb_audio *chip,
 		goto error;
 	if (fp->iface != get_iface_desc(&iface->altsetting[0])->bInterfaceNumber ||
 	    fp->altset_idx >= iface->num_altsetting) {
-		kfree(fp);
-		kfree(rate_table);
-		return -EINVAL;
+		err = -EINVAL;
+		goto error;
 	}
 	alts = &iface->altsetting[fp->altset_idx];
 	if (fp->datainterval == 0)

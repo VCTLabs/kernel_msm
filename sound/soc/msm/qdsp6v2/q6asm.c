@@ -833,7 +833,7 @@ int q6asm_audio_client_buf_free_contiguous(unsigned int dir,
 	}
 
 	if (port->buf[0].data) {
-		pr_debug("%s: data[%p]phys[%pa][%p] , client[%p] handle[%p]\n",
+		pr_debug("%s: data[%pK]phys[%pa][%pK] , client[%pK] handle[%pK]\n",
 			__func__,
 			port->buf[0].data,
 			&port->buf[0].phys,
@@ -864,7 +864,7 @@ void q6asm_audio_client_free(struct audio_client *ac)
 	int loopcnt;
 	struct audio_port_data *port;
 	if (!ac) {
-		pr_err("%s: ac %p\n", __func__, ac);
+		pr_err("%s: ac %pK\n", __func__, ac);
 		return;
 	}
 	if (!ac->session) {
@@ -1078,7 +1078,7 @@ int q6asm_audio_client_buf_alloc(unsigned int dir,
 	size_t len;
 
 	if (!(ac) || ((dir != IN) && (dir != OUT))) {
-		pr_err("%s: ac %p dir %d\n", __func__, ac, dir);
+		pr_err("%s: ac %pK dir %d\n", __func__, ac, dir);
 		return -EINVAL;
 	}
 
@@ -1131,7 +1131,7 @@ int q6asm_audio_client_buf_alloc(unsigned int dir,
 					buf[cnt].used = 1;
 					buf[cnt].size = bufsz;
 					buf[cnt].actual_size = bufsz;
-					pr_debug("%s: data[%p]phys[%pa][%p]\n",
+					pr_debug("%s: data[%pK]phys[%pa][%pK]\n",
 						__func__,
 					   buf[cnt].data,
 					   &buf[cnt].phys,
@@ -1168,7 +1168,7 @@ int q6asm_audio_client_buf_alloc_contiguous(unsigned int dir,
 	int bytes_to_alloc;
 
 	if (!(ac) || ((dir != IN) && (dir != OUT))) {
-		pr_err("%s: ac %p dir %d\n", __func__, ac, dir);
+		pr_err("%s: ac %pK dir %d\n", __func__, ac, dir);
 		return -EINVAL;
 	}
 
@@ -1197,6 +1197,13 @@ int q6asm_audio_client_buf_alloc_contiguous(unsigned int dir,
 	}
 
 	ac->port[dir].buf = buf;
+
+       	/* check for integer overflow */
+	if ((bufcnt > 0) && ((INT_MAX / bufcnt) < bufsz)) {
+		pr_err("%s: integer overflow\n", __func__);
+		mutex_unlock(&ac->cmd_lock);
+		goto fail;
+	}
 
 	bytes_to_alloc = bufsz * bufcnt;
 
@@ -1231,7 +1238,7 @@ int q6asm_audio_client_buf_alloc_contiguous(unsigned int dir,
 			buf[cnt].used = dir ^ 1;
 			buf[cnt].size = bufsz;
 			buf[cnt].actual_size = bufsz;
-			pr_debug("%s: data[%p]phys[%pa][%p]\n",
+			pr_debug("%s: data[%pK]phys[%pa][%pK]\n",
 				__func__,
 				buf[cnt].data,
 				&buf[cnt].phys,
@@ -1274,7 +1281,7 @@ static int32_t q6asm_srvc_callback(struct apr_client_data *data, void *priv)
 	payload = data->payload;
 
 	if (data->opcode == RESET_EVENTS) {
-		pr_debug("%s: Reset event is received: %d %d apr[%p]\n",
+		pr_debug("%s: Reset event is received: %d %d apr[%pK]\n",
 				__func__,
 				data->reset_event,
 				data->reset_proc,
@@ -1462,7 +1469,7 @@ static int32_t q6asm_callback(struct apr_client_data *data, void *priv)
 		atomic_set(&ac->reset, 1);
 		if (ac->apr == NULL)
 			ac->apr = ac->apr2;
-		pr_debug("%s: Reset event is received: %d %d apr[%p]\n",
+		pr_debug("%s: Reset event is received: %d %d apr[%pK]\n",
 			__func__,
 			data->reset_event, data->reset_proc, ac->apr);
 		if (ac->cb)
@@ -1751,7 +1758,7 @@ void *q6asm_is_cpu_buf_avail(int dir, struct audio_client *ac, uint32_t *size,
 	struct audio_port_data *port;
 
 	if (!ac || ((dir != IN) && (dir != OUT))) {
-		pr_err("%s: ac %p dir %d\n", __func__, ac, dir);
+		pr_err("%s: ac %pK dir %d\n", __func__, ac, dir);
 		return NULL;
 	}
 
@@ -1778,7 +1785,7 @@ void *q6asm_is_cpu_buf_avail(int dir, struct audio_client *ac, uint32_t *size,
 		*size = port->buf[idx].actual_size;
 		*index = port->cpu_buf;
 		data = port->buf[idx].data;
-		dev_vdbg(ac->dev, "%s: session[%d]index[%d] data[%p]size[%d]\n",
+		dev_vdbg(ac->dev, "%s: session[%d]index[%d] data[%pK]size[%d]\n",
 						__func__,
 						ac->session,
 						port->cpu_buf,
@@ -1803,7 +1810,7 @@ void *q6asm_is_cpu_buf_avail_nolock(int dir, struct audio_client *ac,
 	struct audio_port_data *port;
 
 	if (!ac || ((dir != IN) && (dir != OUT))) {
-		pr_err("%s: ac %p dir %d\n", __func__, ac, dir);
+		pr_err("%s: ac %pK dir %d\n", __func__, ac, dir);
 		return NULL;
 	}
 
@@ -1830,7 +1837,7 @@ void *q6asm_is_cpu_buf_avail_nolock(int dir, struct audio_client *ac,
 	*size = port->buf[idx].actual_size;
 	*index = port->cpu_buf;
 	data = port->buf[idx].data;
-	dev_vdbg(ac->dev, "%s: session[%d]index[%d] data[%p]size[%d]\n",
+	dev_vdbg(ac->dev, "%s: session[%d]index[%d] data[%pK]size[%d]\n",
 		__func__, ac->session, port->cpu_buf,
 		data, *size);
 	/*
@@ -1851,7 +1858,7 @@ int q6asm_is_dsp_buf_avail(int dir, struct audio_client *ac)
 	uint32_t idx;
 
 	if (!ac || (dir != OUT)) {
-		pr_err("%s: ac %p dir %d\n", __func__, ac, dir);
+		pr_err("%s: ac %pK dir %d\n", __func__, ac, dir);
 		return ret;
 	}
 
@@ -2117,13 +2124,13 @@ int q6asm_open_write_compressed(struct audio_client *ac, uint32_t format,
 	struct asm_stream_cmd_open_write_compressed open;
 
 	if (ac == NULL) {
-		pr_err("%s: ac[%p] NULL\n",  __func__, ac);
+		pr_err("%s: ac[%pK] NULL\n",  __func__, ac);
 		rc = -EINVAL;
 		goto fail_cmd;
 	}
 
 	if (ac->apr == NULL) {
-		pr_err("%s: APR handle[%p] NULL\n", __func__,  ac->apr);
+		pr_err("%s: APR handle[%pK] NULL\n", __func__,  ac->apr);
 		rc = -EINVAL;
 		goto fail_cmd;
 	}
@@ -3971,7 +3978,7 @@ static int q6asm_memory_map_regions(struct audio_client *ac, int dir,
 	q6asm_add_mmaphdr(ac, &mmap_regions->hdr, cmd_size, TRUE,
 					((ac->session << 8) | dir));
 	atomic_set(&ac->mem_state, 1);
-	pr_debug("%s: mmap_region=0x%p token=0x%x\n", __func__,
+	pr_debug("%s: mmap_region=0x%pK token=0x%x\n", __func__,
 		mmap_regions, ((ac->session << 8) | dir));
 
 	mmap_regions->hdr.opcode = ASM_CMD_SHARED_MEM_MAP_REGIONS;
@@ -4258,7 +4265,7 @@ int q6asm_dts_eagle_set(struct audio_client *ac, int param_id, int size,
 	}
 
 	if (!ac || ac->apr == NULL || size <= 0 || !data) {
-		pr_err("DTS_EAGLE_ASM - %s: APR handle NULL, invalid size %i or pointer %p.\n",
+		pr_err("DTS_EAGLE_ASM - %s: APR handle NULL, invalid size %i or pointer %pK.\n",
 			__func__, size, data);
 		return -EINVAL;
 	}
@@ -4308,7 +4315,7 @@ int q6asm_dts_eagle_get(struct audio_client *ac, int param_id, int size,
 	int rc = 0, sz;
 
 	if (!ac || ac->apr == NULL || size <= 0 || !data) {
-		pr_err("DTS_EAGLE_ASM - %s: APR handle NULL, invalid size %i or pointer %p.\n",
+		pr_err("DTS_EAGLE_ASM - %s: APR handle NULL, invalid size %i or pointer %pK.\n",
 			__func__, size, data);
 		return -EINVAL;
 	}
@@ -4733,7 +4740,7 @@ static int __q6asm_read(struct audio_client *ac, bool is_custom_len_reqd,
 		}
 		ab = &port->buf[dsp_buf];
 
-		dev_vdbg(ac->dev, "%s: session[%d]dsp-buf[%d][%p]cpu_buf[%d][%pa]\n",
+		dev_vdbg(ac->dev, "%s: session[%d]dsp-buf[%d][%pK]cpu_buf[%d][%pa]\n",
 				__func__,
 				ac->session,
 				dsp_buf,
@@ -4811,7 +4818,7 @@ int q6asm_read_nolock(struct audio_client *ac)
 		dsp_buf = port->dsp_buf;
 		ab = &port->buf[dsp_buf];
 
-		dev_vdbg(ac->dev, "%s: session[%d]dsp-buf[%d][%p]cpu_buf[%d][%pa]\n",
+		dev_vdbg(ac->dev, "%s: session[%d]dsp-buf[%d][%pK]cpu_buf[%d][%pa]\n",
 				__func__,
 				ac->session,
 				dsp_buf,
