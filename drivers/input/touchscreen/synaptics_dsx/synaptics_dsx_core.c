@@ -354,6 +354,8 @@ struct synaptics_rmi4_exp_fn_data {
 
 static struct synaptics_rmi4_exp_fn_data exp_data;
 
+struct synaptics_dsx_board_data *synaptics_touch_bdata = NULL;
+
 static struct device_attribute attrs[] = {
 	__ATTR(full_pm_cycle, (S_IRUGO | S_IWUSR | S_IWGRP),
 			synaptics_rmi4_full_pm_cycle_show,
@@ -2809,6 +2811,8 @@ static int synaptics_rmi4_set_gpio(struct synaptics_rmi4_data *rmi4_data)
 
 	power_on = bdata->power_on_state;
 	reset_on = bdata->reset_on_state;
+
+	synaptics_touch_bdata = rmi4_data->hw_if->board_data;
 
 	retval = bdata->gpio_config(
 			bdata->irq_gpio,

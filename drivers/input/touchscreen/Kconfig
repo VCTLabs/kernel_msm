@@ -1079,7 +1079,6 @@ config TOUCHSCREEN_YL_GT9XX
 source "drivers/input/touchscreen/gt9xx/Kconfig"
 source "drivers/input/touchscreen/gt9xx_wt/Kconfig"
 source "drivers/input/touchscreen/gt9xx_yl/Kconfig"
-source "drivers/input/touchscreen/synaptics_dsx/Kconfig"
 
 config TOUCHSCREEN_BU21150
 	tristate "JDI AFE BU21150"
