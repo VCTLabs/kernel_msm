@@ -1016,6 +1016,13 @@ static int mdp3_ctrl_display_commit_kickoff(struct msm_fb_data_type *mfd,
 		pr_debug("no buffer in queue yet\n");
 		return -EPERM;
 	}
+	if (panel_info->partial_update_enabled &&
+		is_roi_valid(mdp3_session->dma->source_config, cmt_data->roi)
+		&& update_roi(mdp3_session->dma->roi, cmt_data->roi)) {
+			/* TODO make this match fp2 struct interface */
+			/*      Is this hack even reasonable? */
+			mdp3_session->dma->update_src_cfg = false;
+	}
 
 	panel = mdp3_session->panel;
 	if (mdp3_session->in_splash_screen) {
