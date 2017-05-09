@@ -513,105 +513,6 @@ void mdss_dsi_panel_reset_esd(struct mdss_dsi_ctrl_pdata *ctrl)
 	}
 }
 
-static char caset[] = {0x2a, 0x00, 0x00, 0x03, 0x00};	/* DTYPE_DCS_LWRITE */
-static char paset[] = {0x2b, 0x00, 0x00, 0x05, 0x00};	/* DTYPE_DCS_LWRITE */
-
-/* pack into one frame before sent */
-static struct dsi_cmd_desc set_col_page_addr_cmd[] = {
-	{{DTYPE_DCS_LWRITE, 0, 0, 0, 1, sizeof(caset)}, caset},	/* packed */
-	{{DTYPE_DCS_LWRITE, 1, 0, 0, 1, sizeof(paset)}, paset},
-};
-
-static int mdss_dsi_set_col_page_addr(struct mdss_panel_data *pdata)
-{
-	struct mdss_panel_info *pinfo;
-	struct mdss_rect roi;
-	struct mdss_rect *p_roi;
-	struct mdss_rect *c_roi;
-	struct mdss_dsi_ctrl_pdata *ctrl = NULL;
-	struct mdss_dsi_ctrl_pdata *other = NULL;
-	struct dcs_cmd_req cmdreq;
-	int left_or_both = 0;
-
-	if (pdata == NULL) {
-		pr_err("%s: Invalid input data\n", __func__);
-		return -EINVAL;
-	}
-
-	ctrl = container_of(pdata, struct mdss_dsi_ctrl_pdata,
-				panel_data);
-
-	pinfo = &pdata->panel_info;
-	p_roi = &pinfo->roi;
-
-	/*
-	 * to avoid keep sending same col_page info to panel,
-	 * if roi_merge enabled, the roi of left ctrl is used
-	 * to compare against new merged roi and saved new
-	 * merged roi to it after comparing.
-	 * if roi_merge disabled, then the calling ctrl's roi
-	 * and pinfo's roi are used to compare.
-	 */
-	if (pinfo->partial_update_roi_merge) {
-		left_or_both = mdss_dsi_roi_merge(ctrl, &roi);
-		other = mdss_dsi_get_ctrl_by_index(DSI_CTRL_LEFT);
-		c_roi = &other->roi;
-	} else {
-		c_roi = &ctrl->roi;
-		roi = *p_roi;
-	}
-
-	/* roi had changed, do col_page update */
-	if (mdss_dsi_sync_wait_enable(ctrl) ||
-				!mdss_rect_cmp(c_roi, &roi)) {
-		pr_debug("%s: ndx=%d x=%d y=%d w=%d h=%d\n",
-				__func__, ctrl->ndx, p_roi->x,
-				p_roi->y, p_roi->w, p_roi->h);
-
-		*c_roi = roi; /* keep to ctrl */
-		if (c_roi->w == 0 || c_roi->h == 0) {
-			/* no new frame update */
-			pr_debug("%s: ctrl=%d, no partial roi set\n",
-						__func__, ctrl->ndx);
-			if (!mdss_dsi_sync_wait_enable(ctrl))
-				return 0;
-		}
-
-		if (pinfo->partial_update_dcs_cmd_by_left) {
-			if (left_or_both && ctrl->ndx == DSI_CTRL_RIGHT) {
-				/* 2A/2B sent by left already */
-				return 0;
-			}
-		}
-
-		caset[1] = (((roi.x) & 0xFF00) >> 8);
-		caset[2] = (((roi.x) & 0xFF));
-		caset[3] = (((roi.x - 1 + roi.w) & 0xFF00) >> 8);
-		caset[4] = (((roi.x - 1 + roi.w) & 0xFF));
-		set_col_page_addr_cmd[0].payload = caset;
-
-		paset[1] = (((roi.y) & 0xFF00) >> 8);
-		paset[2] = (((roi.y) & 0xFF));
-		paset[3] = (((roi.y - 1 + roi.h) & 0xFF00) >> 8);
-		paset[4] = (((roi.y - 1 + roi.h) & 0xFF));
-		set_col_page_addr_cmd[1].payload = paset;
-
-		memset(&cmdreq, 0, sizeof(cmdreq));
-		cmdreq.cmds = set_col_page_addr_cmd;
-		cmdreq.cmds_cnt = 2;
-		cmdreq.flags = CMD_REQ_COMMIT | CMD_CLK_CTRL | CMD_REQ_UNICAST;
-		cmdreq.rlen = 0;
-		cmdreq.cb = NULL;
-
-		if (pinfo->partial_update_dcs_cmd_by_left)
-			ctrl = mdss_dsi_get_ctrl_by_index(DSI_CTRL_LEFT);
-
-		mdss_dsi_cmdlist_put(ctrl, &cmdreq);
-	}
-
-	return 0;
-}
-
 static void mdss_dsi_panel_switch_mode(struct mdss_panel_data *pdata,
 							int mode)
 {
@@ -1170,19 +1071,12 @@ static int mdss_dsi_parse_panel_features(struct device_node *np,
 		"qcom,cont-splash-enabled");
 
 	if (pinfo->mipi.mode == DSI_CMD_MODE) {
+		/* TODO fp2 updates: this rolls back unsupported functions */
+		/*      as part of roi backport */
 		pinfo->partial_update_enabled = of_property_read_bool(np,
-				"qcom,partial-update-enabled");
-		pr_info("%s: partial_update_enabled=%d\n", __func__,
-					pinfo->partial_update_enabled);
-		if (pinfo->partial_update_enabled) {
-			ctrl->set_col_page_addr = mdss_dsi_set_col_page_addr;
-			pinfo->partial_update_dcs_cmd_by_left =
-					of_property_read_bool(np,
-					"qcom,partial-update-dcs-cmd-by-left");
-			pinfo->partial_update_roi_merge =
-					of_property_read_bool(np,
-					"qcom,partial-update-roi-merge");
-		}
+			"qcom,partial-update-enabled");
+		pr_info("%s:%d Partial update %s\n", __func__, __LINE__,
+			(pinfo->partial_update_enabled ? "enabled" : "disabled"));
 	}
 
 	pinfo->ulps_feature_enabled = of_property_read_bool(np,
