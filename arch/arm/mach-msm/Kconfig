@@ -1193,17 +1193,9 @@ config MSM_CPR
 	  Enable CPR (core power reduction) in S/W mode, where the processor
 	  get's the notification from CPR block and programs the PMIC.
 
-config MSM_HSIC_SYSMON
-	tristate "MSM HSIC system monitor driver"
-	depends on USB
-	help
-	  Add support for bridging with the system monitor interface of MDM
-	  over HSIC. This driver allows the local system monitor to
-	  communicate with the remote system monitor interface.
-
 config MSM_HSIC_SYSMON_TEST
 	tristate "MSM HSIC system monitor bridge test"
-	depends on USB && MSM_HSIC_SYSMON && DEBUG_FS
+	depends on USB && MSM_SYSMON && DEBUG_FS
 	help
 	  Enable the test hook for the Qualcomm system monitor HSIC driver.
 	  This will create a debugfs file entry named "hsic_sysmon_test" which
