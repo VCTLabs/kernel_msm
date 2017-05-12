@@ -36,6 +36,12 @@
 #include <linux/workqueue.h>
 #include <linux/kernel.h>
 
+#if GTP_HEADER_FW_UPDATE
+#include <linux/namei.h>
+#include <linux/mount.h>
+#include "gt9xx_firmware.h"
+#endif
+
 #define FIRMWARE_NAME_LEN_MAX		256
 
 #define GUP_REG_HW_INFO             0x4220

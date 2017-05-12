@@ -32,6 +32,9 @@
 #include <linux/clk.h>
 #include <linux/platform_device.h>
 #include <linux/pm_runtime.h>
+#include "msm_fb.h"
+#include "mddihosti.h"
+#include "mddihost.h"
 #include <mach/gpio.h>
 
 static int mddi_probe(struct platform_device *pdev);

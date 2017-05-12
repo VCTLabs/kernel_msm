@@ -391,6 +391,14 @@ config  MSM_KRAIT_WFE_FIXUP
 config  ARCH_MSM_CORTEX_A5
 	bool
 
+config MSM_MPM
+	bool "Modem Power Manager"
+	help
+	  MPM is a dedicated hardware resource responsible for entering and
+	  waking up from a system wide low power mode. The MPM driver tracks
+	  the wakeup interrupts and configures the MPM to monitor the wakeup
+	  interrupts when going to a system wide sleep mode.
+
 config MSM_LPM_TEST
 	bool "Low Power Mode test framework"
 	depends on MSM_RPM || MSM_RPM_SMD
@@ -659,6 +667,20 @@ config CPU_HAS_L2_PMU
 	help
 	 Select this if the L2 cache controller has a Performance Monitoring Unit.
 
+config MSM_FIQ_SUPPORT
+	default y
+	bool "Enable installation of an FIQ handler."
+
+config MSM_SERIAL_DEBUGGER
+	select MSM_FIQ_SUPPORT
+	select KERNEL_DEBUGGER_CORE
+	default n
+	bool "FIQ Mode Serial Debugger"
+	help
+	  The FIQ serial debugger can accept commands even when the
+	  kernel is unresponsive due to being stuck with interrupts
+	  disabled.  Depends on the kernel debugger core in drivers/misc.
+
 config MSM_SERIAL_DEBUGGER_CONSOLE
 	depends on MSM_SERIAL_DEBUGGER
 	default n
@@ -674,6 +696,32 @@ config MSM_PCIE
 	help
 	  Enables the PCIe functionality by configures PCIe core on
 	  MSM chipset and by enabling the ARM PCI framework extension.
+
+config MSM_ONCRPCROUTER
+	depends on MSM_SMD
+	default n
+	bool "MSM ONCRPC router support"
+	help
+	  Support for the MSM ONCRPC router for communication between
+	  the ARM9 and ARM11
+
+config MSM_IPC_ROUTER
+	depends on NET
+	default n
+	bool "MSM IPC Router support"
+	help
+	  Support for the MSM IPC Router for communication between
+	  the APPs and the MODEM
+
+config MSM_IPC_ROUTER_SECURITY
+	depends on MSM_IPC_ROUTER
+	bool "MSM IPC Router Security support"
+	help
+	  This feature of IPC Router will enforce security rules
+	  configured by a security script from the user-space. IPC Router
+	  once configured with the security rules will ensure that the
+	  sender of the message to a service belongs to the relevant
+	  Linux group as configured by the security script.
 
 config MSM_TEST_QMI_CLIENT
 	depends on MSM_QMI_INTERFACE
@@ -701,6 +749,50 @@ config MSM_RPC_LOOPBACK_XPRT
 	  Support for routing RPC messages between APPS clients
 	  and APPS servers.  Helps in testing APPS RPC framework.
 
+config MSM_RPCSERVER_TIME_REMOTE
+	depends on MSM_ONCRPCROUTER && RTC_HCTOSYS
+	default y
+	bool "Time remote RPC server"
+	help
+	  The time remote server receives notification of time bases and
+	  reports these events to registered callback functions.
+
+config MSM_RPCSERVER_WATCHDOG
+	depends on MSM_ONCRPCROUTER
+	default y
+	bool "Watchdog RPC server"
+	help
+	  The dog_keepalive server handles watchdog events.
+
+config MSM_RPC_WATCHDOG
+	depends on MSM_ONCRPCROUTER
+	default n
+	bool "Watchdog RPC client"
+	help
+	  The dog_keepalive client module.
+
+config MSM_RPC_PING
+	depends on MSM_ONCRPCROUTER && DEBUG_FS
+	default m
+	bool "MSM rpc ping"
+	help
+	  Implements MSM rpc ping test module.
+
+config MSM_RPC_OEM_RAPI
+	depends on MSM_ONCRPCROUTER
+	default m
+	bool "MSM oem rapi"
+	help
+	  Implements MSM oem rapi client module.
+
+config MSM_RPCSERVER_HANDSET
+	depends on MSM_ONCRPCROUTER
+	default y
+	bool "Handset events RPC server"
+	help
+	  Support for receiving handset events like headset detect,
+	  headset switch and clamshell state.
+
 config RTAC
 	bool "MSM8K real-time audio calibration support"
 	default y
@@ -721,100 +813,12 @@ config MSM_DMA_TEST
 	  Intended to be compiled as a module.  Provides a device node
 	  and ioctls for testing the MSM dma system.
 
-config WIFI_CONTROL_FUNC
-	bool "Enable WiFi control function abstraction"
-	help
-	  Enables Power/Reset/Carddetect function abstraction
-
-config WIFI_MEM_PREALLOC
-	depends on WIFI_CONTROL_FUNC
-	bool "Preallocate memory for WiFi buffers"
-	help
-	  Preallocates memory buffers for WiFi driver
-
 config SURF_FFA_GPIO_KEYPAD
 	bool "MSM SURF/FFA GPIO keypad"
 	depends on INPUT_GPIO = "y"
 	default y
 	help
 	  Select if the GPIO keypad is attached.
-
-config MSM_SLEEP_TIME_OVERRIDE
-	bool "Allow overriding suspend/sleep time with PM module parameter"
-	default y
-	help
-	  Enable the module parameter sleep_time_override. Specified
-	  in units of seconds, it overwrites the normal sleep time of
-	  suspend. The feature is required for automated power management
-	  testing.
-
-config MSM_MEMORY_LOW_POWER_MODE
-	bool "Control the low power modes of memory"
-	default n
-	help
-	  The application processor controls whether memory should enter
-	  which low power mode.
-
-choice
-	prompt "Default Memory Low Power Mode during Idle"
-	depends on MSM_MEMORY_LOW_POWER_MODE
-	default MSM_MEMORY_LOW_POWER_MODE_IDLE_ACTIVE
-	help
-	  Selects the default low power mode of the memory during idle
-	  sleep.
-
-	config MSM_MEMORY_LOW_POWER_MODE_IDLE_ACTIVE
-		bool "Memory active"
-
-	config MSM_MEMORY_LOW_POWER_MODE_IDLE_RETENTION
-		bool "Memory in retention"
-
-	config MSM_MEMORY_LOW_POWER_MODE_IDLE_DEEP_POWER_DOWN
-		bool "Memory in deep power down"
-endchoice
-
-choice
-	prompt "Default Memory Low Power Mode during Suspend"
-	depends on MSM_MEMORY_LOW_POWER_MODE
-	default MSM_MEMORY_LOW_POWER_MODE_SUSPEND_ACTIVE
-	help
-	  Selects the default low power mode of the memory during suspend
-	  sleep.
-
-	config MSM_MEMORY_LOW_POWER_MODE_SUSPEND_ACTIVE
-		bool "Memory active"
-
-	config MSM_MEMORY_LOW_POWER_MODE_SUSPEND_RETENTION
-		bool "Memory in retention"
-
-	config MSM_MEMORY_LOW_POWER_MODE_SUSPEND_DEEP_POWER_DOWN
-		bool "Memory in deep power down"
-endchoice
-
-choice
-	prompt "Power management timeout action"
-	default MSM_PM_TIMEOUT_HALT
-	help
-	  Selects the Application Processor's action when Power Management
-	  times out waiting for Modem's handshake.
-
-	config MSM_PM_TIMEOUT_HALT
-		bool "Halt the Application Processor"
-
-	config MSM_PM_TIMEOUT_RESET_MODEM
-		bool "Reset the Modem Processor"
-
-	config MSM_PM_TIMEOUT_RESET_CHIP
-		bool "Reset the entire chip"
-endchoice
-
-config MSM_IDLE_WAIT_ON_MODEM
-	int "Wait for Modem to become ready for idle power collapse"
-	default 0
-	help
-	  If Modem is not ready to handle Application Processor's request
-	  for idle power collapse, wait the number of microseconds in case
-	  Modem becomes ready soon.
 
 config MSM_SMCMOD
 	tristate "Secure Monitor Call (SMC) Module"
@@ -825,6 +829,147 @@ config MSM_SMCMOD
 	  to execute the Secure Monitor Call (SMC) to switch from non-secure
 	  to secure execution in the fsm9xxx and msm8x26 targets. This module
 	  utilizes Ion for buffer management.
+
+config MSM_SUBSYSTEM_RESTART
+	bool "MSM Subsystem Restart"
+	help
+	  This option enables the MSM subsystem restart framework.
+
+	  The MSM subsystem restart framework provides support to boot,
+	  shutdown, and restart subsystems with a reference counted API.
+	  It also notifies userspace of transitions between these states via
+	  sysfs.
+
+config MSM_SYSMON_COMM
+	bool "MSM System Monitor communication support"
+	depends on MSM_SMD && MSM_SUBSYSTEM_RESTART
+	help
+	  This option adds support for MSM System Monitor library, which
+	  provides an API that may be used for notifying subsystems within
+	  the SoC about other subsystems' power-up/down state-changes.
+
+config MSM_PIL
+	bool "Peripheral image loading"
+	select FW_LOADER
+	default n
+	help
+	  Some peripherals need to be loaded into memory before they can be
+	  brought out of reset.
+
+	  Say yes to support these devices.
+
+config MSM_PIL_MODEM
+	tristate "Modem (ARM11) Boot Support"
+	depends on MSM_PIL && MSM_SUBSYSTEM_RESTART
+	help
+	  Support for booting and shutting down ARM11 Modem processors.
+
+config MSM_PIL_QDSP6V3
+	tristate "QDSP6v3 (Hexagon) Boot Support"
+	depends on MSM_PIL && MSM_SUBSYSTEM_RESTART
+	help
+	  Support for booting and shutting down QDSP6v3 processors (hexagon).
+	  The QDSP6 is a low power DSP used in audio software applications.
+
+config MSM_PIL_LPASS_QDSP6V4
+	tristate "LPASS QDSP6v4 (Hexagon) Boot Support"
+	depends on MSM_SUBSYSTEM_RESTART
+	help
+	  Support for booting and shutting down QDSP6v4 processors (hexagon)
+	  in low power audio subsystems. If you would like to record or
+	  play audio then say Y here.
+
+	  If unsure, say N.
+
+config MSM_PIL_MODEM_QDSP6V4
+	tristate "Modem QDSP6v4 (Hexagon) Boot Support"
+	depends on MSM_SUBSYSTEM_RESTART
+	help
+	  Support for booting and shutting down QDSP6v4 processors (hexagon)
+	  in modem subsystems. If you would like to make or receive phone
+	  calls then say Y here.
+
+	  If unsure, say N.
+
+config MSM_PIL_LPASS_QDSP6V5
+	tristate "LPASS QDSP6v5 (Hexagon) Boot Support"
+	depends on MSM_PIL && MSM_SUBSYSTEM_RESTART
+	help
+	  Support for booting and shutting down QDSP6v5 (Hexagon) processors
+	  in low power audio subsystems. This driver also monitors the ADSP
+	  SMSM status bits and the ADSP's watchdog interrupt and restarts the
+	  ADSP if the processor encounters a fatal error.
+
+config MSM_PIL_MSS_QDSP6V5
+	tristate "MSS QDSP6v5 (Hexagon) Boot Support"
+	depends on MSM_PIL && MSM_SUBSYSTEM_RESTART
+	help
+	  Support for booting and shutting down QDSP6v5 (Hexagon) processors
+	  in modem subsystems. If you would like to make or receive phone
+	  calls then say Y here.
+
+	  If unsure, say N.
+
+config MSM_PIL_RIVA
+	tristate "RIVA (WCNSS) Boot Support"
+	depends on MSM_PIL && MSM_SUBSYSTEM_RESTART
+	help
+	  Support for booting and shutting down the RIVA processor (WCNSS).
+	  Riva is the wireless subsystem processor used in bluetooth, wireless
+	  LAN, and FM software applications.
+
+config MSM_PIL_TZAPPS
+	tristate "TZApps Boot Support"
+	depends on MSM_PIL && MSM_SUBSYSTEM_RESTART
+	help
+	  Support for booting and shutting down TZApps.
+
+	  TZApps is an image that runs in the secure processor state. It is
+	  used to decrypt data and perform secure operations on the behalf of
+	  the kernel.
+
+config MSM_PIL_DSPS
+	tristate "DSPS Boot Support"
+	depends on MSM_PIL && MSM_SUBSYSTEM_RESTART
+	help
+	  Support for booting and shutting down ARM7 DSPS processors.
+
+	  DSPS is a sensors offloading processor used for applications such
+	  as rotation detection, temperature, etc.
+
+config MSM_PIL_VIDC
+	tristate "Video Core Secure Boot Support"
+	depends on MSM_PIL && MSM_SUBSYSTEM_RESTART
+	help
+	  Support for authenticating the video core image.
+
+config MSM_PIL_GSS
+	tristate "GSS (Cortex A5) Boot Support"
+	depends on MSM_PIL && MSM_SUBSYSTEM_RESTART
+	help
+	  Support for booting and shutting down Cortex A5 processors which run
+	  GPS subsystem firmware.
+
+config MSM_PIL_PRONTO
+	tristate "PRONTO (WCNSS) Boot Support"
+	depends on MSM_PIL && MSM_SUBSYSTEM_RESTART
+	help
+	  Support for booting and shutting down the PRONTO processor (WCNSS).
+	  PRONTO is the wireless subsystem processor used in bluetooth, wireless
+	  LAN, and FM software applications.
+
+config MSM_PIL_FEMTO
+	tristate "FSM99XX Boot Support"
+	depends on MSM_PIL && ARCH_FSM9900
+	help
+	  Support for loading and booting firmware images for multiple
+	  modems on the FSM9900 family targets.
+	  Select Y if you want the modems to boot.
+	  If unsure, select N.
+
+config MSM_SCM
+	bool "Secure Channel Manager (SCM) support"
+	default n
 
 config MSM_DIRECT_SCLK_ACCESS
 	bool "Direct access to the SCLK timer"
@@ -840,6 +985,59 @@ config MSM_BUS_RPM_MULTI_TIER_ENABLED
 	bool "RPM Multi-tiering Configuration"
 	depends on MSM_BUS_SCALING
 
+config MSM_DLOAD_MODE
+	bool "Enable download mode on crashes"
+	default n
+	help
+		This makes the SoC enter download mode when it resets
+		due to a kernel panic. Note that this doesn't by itself
+		make the kernel reboot on a kernel panic - that must be
+		enabled via another mechanism.
+
+config MSM_JTAG
+	bool "Debug and ETM trace support across power collapse"
+	help
+	  Enables support for debugging (specifically breakpoints) and ETM
+	  processor tracing across power collapse both for JTag and OS hosted
+	  software running on the target. Enabling this will ensure debug
+	  and ETM registers are saved and restored across power collapse.
+
+	  If unsure, say 'N' here to avoid potential power, performance and
+	  memory penalty.
+
+config MSM_JTAG_MM
+	bool "Debug and ETM trace support across power collapse using memory mapped access"
+	help
+	  Enables support for debugging (specifically breakpoints) and ETM
+	  processor tracing across power collapse both for JTag and OS hosted
+	  software running on the target. Enabling this will ensure debug
+	  and ETM registers are saved and restored across power collapse.
+
+	  Required on targets on which cp14 access to debug and ETM registers is
+	  not permitted and so memory mapped access is necessary.
+
+	  If unsure, say 'N' here to avoid potential power, performance and
+	  memory penalty.
+
+config MSM_JTAGV8
+	bool "Debug and ETM trace support across power collapse for ARMv8"
+	help
+	  Enables support for debugging (specifically breakpoints) and ETM
+	  processor tracing across power collapse both for JTag and OS hosted
+	  software running on ARMv8 target. Enabling this will ensure debug
+	  and ETM registers are saved and restored across power collapse.
+
+config MSM_SLEEP_STATS_DEVICE
+	bool "Enable exporting of MSM sleep device stats to userspace"
+
+config MSM_RUN_QUEUE_STATS
+	bool "Enable collection and exporting of MSM Run Queue stats to userspace"
+	default n
+	help
+	 This option enalbes statistics collection on Run Queue. A daemon
+         in user mode, called MPDecision will be using this data to decide
+         on when to switch off/on the other cores.
+
 config MSM_STANDALONE_POWER_COLLAPSE
        bool "Enable standalone power collapse"
        default n
@@ -850,31 +1048,41 @@ config MSM_GSBI9_UART
 	help
 	  This enables GSBI9 configured into UART.
 
-config MSM_ULTRASOUND
-	bool "QDSP6V2 HW Ultrasound support"
+config MSM_SHOW_RESUME_IRQ
+	bool "Enable logging of interrupts that could have caused resume"
+	depends on (ARM_GIC || PMIC8058)
+	default y if PMIC8058
+	default n
 	help
-	  Enable HW Ultrasound support in QDSP6V2.
-	  QDSP6V2 can support HW encoder & decoder and
-	  ultrasound processing. It will enable
-	  ultrasound data paths between
-	  HW and services, calculating input events
-	  upon the ultrasound data.
+		This option logs wake up interrupts that have triggered just before
+		the resume loop unrolls. Say Y if you want to debug why the system
+		resumed.
 
-config PM8XXX_RPC_VIBRATOR
-	bool "RPC based Vibrator on PM8xxx PMICs"
-	depends on MSM_RPC_VIBRATOR
-	help
-	  Enable the vibrator support on MSM over RPC. The vibrator
-	  is connected on the PM8XXX PMIC. Say Y if you want to enable
-	  this feature.
+config MSM_FAKE_BATTERY
+		depends on POWER_SUPPLY
+		default n
+		bool "MSM Fake Battery"
+		help
+		 Enables MSM fake battery driver.
 
-config SENSORS_ADSP
-	bool "Enable Sensors Driver Support for ADSP"
+config USE_PINCTRL_IRQ
+	default n
+	bool "Use Pinctrl IRQ chip"
 	help
-	  Add support for sensors ADSP driver.
-	  This driver is used for exercising different sensors use cases,
-	  such as for lower-power OCMEM use cases, and for time syncing
-	  with ADSP clock.
+	 Use Irq chip with Pinctrl subsystem instead of the irq chip
+	 associated with gpio lib. The pinctrl irq chip allows the pin
+	 attributes to be configured, prior to configuring them as
+	 interrupt triggers.
+
+config MSM_EBI_ERP
+	bool "External Bus Interface (EBI) error reporting"
+	help
+	  Say 'Y' here to enable reporting of external bus interface errors to
+	  the kernel log. Information such as the offending address and
+	  transaction type will be logged. This may be useful for debugging
+	  seemingly broken memory accesses.
+
+	  For production builds, you should probably say 'N' here.
 
 config MSM_CACHE_ERP
 	bool "Cache / CPU error reporting"
@@ -970,14 +1178,20 @@ config MSM_L2_ERP_2BIT_PANIC
 	  For production builds, it may be acceptable to say 'N' here, since
 	  an uncorrectable error might not necessarily cause further problems.
 
+config MSM_DCVS
+	bool "Use MSM DCVS for CPU/GPU Frequency control"
+	depends on MSM_SCM
+	help
+	  Enable support for MSM DCVS to control all CPU and GPU core frequencies.
+	  The DCVS manager allows idle driver to feed the idle information to the
+	  algorithm and the algorithm returns a frequency for the core which is
+	  passed to the frequency change driver.
+
 config MSM_CPR
 	tristate "Use MSM CPR in S/W mode"
 	help
 	  Enable CPR (core power reduction) in S/W mode, where the processor
 	  get's the notification from CPR block and programs the PMIC.
-
-config HAVE_ARCH_HAS_CURRENT_TIMER
-	bool
 
 config MSM_HSIC_SYSMON
 	tristate "MSM HSIC system monitor driver"
@@ -996,23 +1210,14 @@ config MSM_HSIC_SYSMON_TEST
 	  can be read and written to send character data to the sysmon port of
 	  the modem over USB.
 
-config MSM_RPC_USB
-	tristate "MSM RPC USB driver"
+config MSM_RPC_PMAPP
+	tristate "MSM RPC PMIC APP driver"
 	depends on MSM_ONCRPCROUTER
 	help
-	 This driver supports the USB configuration support over the RPC
-	 interface. It support the HS USB module connected to the MSM
-	 and FS USB which is connected over the PMIC. This support is
-	 required for MSMs on which the APPS does not have a direct access
-	 to the PMIC.
-
-config MSM_ENABLE_WDOG_DEBUG_CONTROL
-	bool "Enable control of watchdog debug and boot partition select"
-	help
-	  Enables support for controlling watchdog debug and boot partition
-	  select. This is currently used to bypass debug image for PS_HOLD reset
-	  by disabling watchdog debug and boot partition select. This allows
-	  for a clean MSM reset for reboot scenarios.
+	 This driver supports the configuration of various PMIC APP modules
+	 such as display backlight, vreg pin-ctrl, smps clock over the RPC
+	 interface. This support is required for MSMs on which the APPS
+	 does not have a direct access to the PMIC.
 
 config MSM_UARTDM_Core_v14
 	bool "Use MSM BLSP based HSUART Core v1.4"

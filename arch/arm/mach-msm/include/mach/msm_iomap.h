@@ -47,6 +47,15 @@
 
 #define MSM8625_WARM_BOOT_PHYS  0x0FD00000
 
+/* Legacy single-target iomap */
+#if defined(CONFIG_ARCH_QSD8X50)
+#include "msm_iomap-8x50.h"
+#elif defined(CONFIG_ARCH_MSM8X60)
+#include "msm_iomap-8x60.h"
+#elif defined(CONFIG_ARCH_FSM9XXX)
+#include "msm_iomap-fsm9xxx.h"
+#else
+
 /* Unified iomap */
 
 #define MSM_TMR_BASE		IOMEM(0xFA000000)	/*  4K	*/

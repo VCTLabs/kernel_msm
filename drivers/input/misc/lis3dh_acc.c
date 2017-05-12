@@ -47,7 +47,8 @@
  Revision 1.0.9 07/25/2011
   Romove several unused functions,add 5ms delay in init,change sysfs attributes.
  Revision 1.1.0 07/10/2012
-  To replace some deprecated functions for 3.4 kernel; to pass the checkpatch's formatting requirement;
+  To replace some deprecated functions for 3.4 kernel;
+  To pass the checkpatch's formatting requirement;
   To add regulator request;
 
  ******************************************************************************/
@@ -88,6 +89,7 @@
 #define SENSITIVITY_4G		2	/**	sensitivity scale	*/
 #define SENSITIVITY_8G		4	/**	sensitivity scale	*/
 #define SENSITIVITY_16G		12	/**	sensitivity scale	*/
+
 
 /* Accelerometer Sensor Operating Mode */
 #define LIS3DH_ACC_ENABLE	0x01
@@ -155,7 +157,6 @@
 
 #define IS_FIFO_FULL(status)		(status & FIFO_STATE_FULL)
 #define IS_WATER_MARK_REACHED(status)	(status & FIFO_STATE_WATER_MARK)
-
 
 #define ODR1		0x10  /* 1Hz output data rate */
 #define ODR10		0x20  /* 10Hz output data rate */

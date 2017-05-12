@@ -1,4 +1,4 @@
-/* Copyright (c) 2009-2012, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2009-2013, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -163,6 +163,7 @@ static ssize_t mdp_reg_write(
 	debug_buf[count] = 0;	/* end of string */
 
 	cnt = sscanf(debug_buf, "%x %x", &off, &data);
+
         if (cnt != 2)
                 return -EFAULT;
 
@@ -636,6 +637,7 @@ static void mddi_reg_write(int ndx, uint32 off, uint32 data)
 		base = (char *)msm_emdh_base;
 	else
 		base = (char *)msm_pmdh_base;
+
         if (base == NULL) {
                 printk(KERN_INFO "%s: base offset is not set properly. \
                        Please check if MDDI is enabled correctly\n", __func__);
@@ -647,6 +649,7 @@ static void mddi_reg_write(int ndx, uint32 off, uint32 data)
                                off, MDDI_MAX_OFFSET);
                  return;
         }
+
 	mdp_pipe_ctrl(MDP_CMD_BLOCK, MDP_BLOCK_POWER_ON, FALSE);
 	writel(data, base + off);
 	mdp_pipe_ctrl(MDP_CMD_BLOCK, MDP_BLOCK_POWER_OFF, FALSE);
@@ -716,6 +719,7 @@ static ssize_t pmdh_reg_write(
                              off, MDDI_MAX_OFFSET);
                return -EFAULT;
        }
+
 	mddi_reg_write(0, off, data);
 
 	return count;
@@ -777,6 +781,7 @@ static ssize_t emdh_reg_write(
                               off, MDDI_MAX_OFFSET);
                return -EFAULT;
         }
+
 	mddi_reg_write(1, off, data);
 
 	return count;
@@ -932,6 +937,7 @@ static ssize_t dbg_offset_write(
          dbg_offset = off;
          dbg_count = num;
          dbg_base = (char *)base;
+
 	printk(KERN_INFO "%s: offset=%x cnt=%d base=%x\n", __func__,
 				dbg_offset, dbg_count, (int)dbg_base);
 
@@ -989,6 +995,7 @@ static ssize_t dbg_reg_write(
 	debug_buf[count] = 0;	/* end of string */
 
 	cnt = sscanf(debug_buf, "%x %x", &off, &data);
+
         if (cnt != 2)
               return -EFAULT;
         if (off > MDP_MAX_OFFSET) {
@@ -996,6 +1003,7 @@ static ssize_t dbg_reg_write(
                                  off, MDP_MAX_OFFSET);
                return -EFAULT;
         }
+
 	writel(data, dbg_base + off);
 
 	printk(KERN_INFO "%s: addr=%x data=%x\n",
@@ -1320,6 +1328,7 @@ static ssize_t hdmi_reg_write(
                              off, HDMI_MAX_OFFSET);
                return -EFAULT;
         }
+
 	writel(data, base + off);
 
 	printk(KERN_INFO "%s: addr=%x data=%x\n",

@@ -52,6 +52,16 @@ obj-$(CONFIG_MSM_PIL_SSR_GENERIC) += subsys-pil-tz.o
 obj-$(CONFIG_MSM_PIL_MSS_QDSP6V5) += pil-q6v5.o pil-msa.o pil-q6v5-mss.o
 obj-$(CONFIG_MSM_PIL_FEMTO) += pil-q6v5.o pil-msa.o pil-femto-modem.o
 
+obj-$(CONFIG_MSM_PIL_QDSP6V3) += pil-q6v3.o
+obj-$(CONFIG_MSM_PIL_LPASS_QDSP6V4) += pil-q6v4.o pil-q6v4-lpass.o
+obj-$(CONFIG_MSM_PIL_MODEM_QDSP6V4) += pil-q6v4.o pil-q6v4-mss.o
+obj-$(CONFIG_MSM_PIL_RIVA) += pil-riva.o
+obj-$(CONFIG_MSM_PIL_TZAPPS) += pil-tzapps.o
+obj-$(CONFIG_MSM_PIL_VIDC) += pil-vidc.o
+obj-$(CONFIG_MSM_PIL_MODEM) += pil-modem.o
+obj-$(CONFIG_MSM_PIL_DSPS) += pil-dsps.o
+obj-$(CONFIG_MSM_PIL_GSS) += pil-gss.o
+
 obj-$(CONFIG_MSM_OCMEM) += ocmem.o ocmem_allocator.o ocmem_notifier.o
 obj-$(CONFIG_MSM_OCMEM) += ocmem_sched.o ocmem_api.o ocmem_rdm.o ocmem_core.o
 

@@ -47,8 +47,8 @@ obj-$(CONFIG_MSM_PM) += ext-buck-control.o
 
 CFLAGS_msm_vibrator.o += -Idrivers/staging/android
 
+obj-$(CONFIG_MSM_MPM) += mpm.o
 obj-$(CONFIG_MSM_LPM_TEST) += test-lpm.o
-
 
 obj-$(CONFIG_ARCH_MSM8974) += gpiomux-v2.o gpiomux.o
 obj-$(CONFIG_ARCH_MDM9630) += gpiomux-v2.o gpiomux.o
@@ -60,8 +60,18 @@ obj-$(CONFIG_ARCH_FSM9900) += gpiomux-v2.o gpiomux.o
 obj-$(CONFIG_MSM_CACHE_ERP) += cache_erp.o
 obj-$(CONFIG_MSM_HSIC_SYSMON) += hsic_sysmon.o
 obj-$(CONFIG_MSM_HSIC_SYSMON_TEST) += hsic_sysmon_test.o
+obj-$(CONFIG_MSM_SLEEP_STATS_DEVICE) += idle_stats_device.o
+obj-$(CONFIG_MSM_DCVS) += msm_dcvs_scm.o msm_dcvs.o msm_mpdecision.o
+obj-$(CONFIG_MSM_RUN_QUEUE_STATS) += msm_rq_stats.o
+obj-$(CONFIG_MSM_FAKE_BATTERY) += fish_battery.o
 
-obj-$(CONFIG_MSM_RPC_USB) += rpc_hsusb.o rpc_fsusb.o
+obj-$(CONFIG_MSM_EBI_ERP) += ebi_erp.o
+obj-$(CONFIG_MSM_CPR) += msm_cpr.o
+obj-$(CONFIG_MSM_RPC_PMAPP) += rpc_pmapp.o
+
+ifdef CONFIG_MSM_CPR
+obj-$(CONFIG_DEBUG_FS) += msm_cpr-debug.o
+endif
 
 obj-$(CONFIG_MEMORY_HOLE_CARVEOUT) +=  msm_mem_hole.o
 
