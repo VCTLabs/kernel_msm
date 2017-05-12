@@ -24,17 +24,17 @@
 #include <linux/reboot.h>
 #include <linux/interrupt.h>
 
+#include <soc/qcom/socinfo.h>
+#include <soc/qcom/subsystem_restart.h>
 #include <mach/msm_xo.h>
-#include <mach/socinfo.h>
 #include <mach/msm_bus_board.h>
 #include <mach/msm_bus.h>
-#include <mach/subsystem_restart.h>
 #include <mach/ramdump.h>
 #include <mach/msm_smem.h>
 #include <mach/msm_smsm.h>
+#include <mach/scm-pas.h>
 
 #include "peripheral-loader.h"
-#include "scm-pas.h"
 
 #define GSS_CSR_AHB_CLK_SEL	0x0
 #define GSS_CSR_RESET		0x4

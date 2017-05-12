@@ -17,9 +17,9 @@
 #include <linux/slab.h>
 #include <linux/mm.h>
 #include <linux/memory_alloc.h>
+#include <soc/qcom/scm.h>
 #include <asm/cacheflush.h>
 #include <mach/memory.h>
-#include <mach/scm.h>
 #include <mach/msm_dcvs_scm.h>
 #include <trace/events/mpdcvs_trace.h>
 

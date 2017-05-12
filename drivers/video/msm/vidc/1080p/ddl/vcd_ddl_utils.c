@@ -13,7 +13,7 @@
 #include <linux/memory_alloc.h>
 #include <linux/delay.h>
 #include <mach/iommu_domains.h>
-#include <mach/subsystem_restart.h>
+#include <soc/qcom/subsystem_restart.h>
 #include "vcd_ddl_utils.h"
 #include "vcd_ddl.h"
 #include "vcd_res_tracker_api.h"

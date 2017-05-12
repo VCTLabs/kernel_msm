@@ -34,7 +34,7 @@
 #include <asm/uaccess.h>
 #include <asm/byteorder.h>
 
-#include <mach/subsystem_restart.h>
+#include <soc/qcom/subsystem_restart.h>
 #include "smd_rpcrouter.h"
 
 /* Support 64KB of data plus some space for headers */

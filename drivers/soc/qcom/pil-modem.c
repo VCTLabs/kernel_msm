@@ -22,7 +22,7 @@
 #include <linux/interrupt.h>
 #include <linux/reboot.h>
 
-#include <mach/subsystem_restart.h>
+#include <soc/qcom/subsystem_restart.h>
 #include <mach/msm_smsm.h>
 #include <mach/ramdump.h>
 #include <mach/msm_bus_board.h>

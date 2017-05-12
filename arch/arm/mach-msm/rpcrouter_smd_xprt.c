@@ -22,6 +22,7 @@
 
 #include <mach/msm_smd.h>
 #include <mach/msm_smsm.h>
+
 #include "smd_rpcrouter.h"
 
 struct rpcrouter_smd_xprt {

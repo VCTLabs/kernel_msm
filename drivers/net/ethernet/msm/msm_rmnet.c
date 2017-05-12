@@ -36,8 +36,8 @@
 #include <linux/earlysuspend.h>
 #endif
 
+#include <soc/qcom/subsystem_restart.h>
 #include <mach/msm_smd.h>
-#include <mach/subsystem_restart.h>
 
 /* Debug message support */
 static int msm_rmnet_debug_mask;

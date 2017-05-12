@@ -16,11 +16,11 @@
 #include <linux/err.h>
 #include <linux/clk.h>
 
-#include <mach/subsystem_restart.h>
+#include <soc/qcom/subsystem_restart.h>
 #include <mach/msm_bus_board.h>
+#include <mach/scm-pas.h>
 
 #include "peripheral-loader.h"
-#include "scm-pas.h"
 
 struct vidc_data {
 	struct clk *smmu_iface;

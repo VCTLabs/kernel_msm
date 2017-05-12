@@ -15,11 +15,11 @@
 #include <linux/platform_device.h>
 #include <linux/err.h>
 
-#include <mach/subsystem_restart.h>
+#include <soc/qcom/subsystem_restart.h>
 #include <mach/msm_bus_board.h>
+#include <mach/scm-pas.h>
 
 #include "peripheral-loader.h"
-#include "scm-pas.h"
 
 struct tzapps_data {
 	struct pil_desc pil_desc;

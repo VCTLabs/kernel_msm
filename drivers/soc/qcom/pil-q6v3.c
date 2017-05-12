@@ -21,7 +21,7 @@
 #include <linux/workqueue.h>
 #include <linux/interrupt.h>
 
-#include <mach/subsystem_restart.h>
+#include <soc/qcom/subsystem_restart.h>
 #include <mach/scm.h>
 #include <mach/ramdump.h>
 #include <mach/msm_bus_board.h>

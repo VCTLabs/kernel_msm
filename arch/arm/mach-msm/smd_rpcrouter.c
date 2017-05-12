@@ -44,9 +44,9 @@
 
 #include <asm/byteorder.h>
 
+#include <soc/qcom/smem_log.h>
+#include <soc/qcom/subsystem_notif.h>
 #include <mach/msm_smd.h>
-#include <mach/smem_log.h>
-#include <mach/subsystem_notif.h>
 #include <mach/msm_smsm.h>
 
 #include "smd_rpcrouter.h"
