@@ -26,6 +26,7 @@
 #include <linux/mount.h>
 #include <linux/sched.h>
 #include <linux/prctl.h>
+#include <linux/uidgid.h>
 #include <linux/securebits.h>
 #include <linux/user_namespace.h>
 #include <linux/binfmts.h>
@@ -83,9 +84,9 @@ int cap_capable(const struct cred *cred, struct user_namespace *targ_ns,
 	struct user_namespace *ns = targ_ns;
 
 #ifdef CONFIG_ANDROID_PARANOID_NETWORK
-	if (cap == CAP_NET_RAW && in_egroup_p(AID_NET_RAW))
+	if (cap == CAP_NET_RAW && in_egroup_p(KGIDT_INIT(AID_NET_RAW)))
 		return 0;
-	if (cap == CAP_NET_ADMIN && in_egroup_p(AID_NET_ADMIN))
+	if (cap == CAP_NET_ADMIN && in_egroup_p(KGIDT_INIT(AID_NET_ADMIN)))
 		return 0;
 #endif
 

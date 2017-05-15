@@ -134,12 +134,12 @@ static inline void qmp_sphinx_logk_recvfrom
 }
 
 static inline void qmp_sphinx_logk_oom_adjust_write
-		(pid_t pid, uid_t uid, int oom_adj)
+		(pid_t pid, kuid_t uid, int oom_adj)
 {
 }
 
 static inline void qmp_sphinx_logk_oom_score_adj_write
-		(pid_t pid, uid_t uid, int oom_adj_score)
+		(pid_t pid, kuid_t uid, int oom_adj_score)
 {
 }
 #endif
