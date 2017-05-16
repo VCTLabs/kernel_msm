@@ -61,6 +61,7 @@
 #include <linux/bio.h>
 #include <linux/bitops.h>
 #include <linux/fdtable.h>
+#include <linux/uidgid.h>
 #include <linux/selinux.h>
 #include <linux/security.h>
 
@@ -366,7 +367,7 @@ static bool pft_is_current_process_registered(void)
 {
 	int is_registered = false;
 	int i;
-	u32 uid = current_uid();
+	uid_t uid = from_kuid_munged(current_user_ns(), current_uid());
 
 	mutex_lock(&pft_dev->lock);
 	for (i = 0; i < pft_dev->uid_count; i++) {
@@ -607,7 +608,7 @@ static int pft_tag_file(struct dentry *dentry, u32 key_index)
  *
  * Return: encryption key index.
  */
-static inline u32 pft_get_app_key_index(u32 uid)
+static inline u32 pft_get_app_key_index(kuid_t uid)
 {
 	return PFT_DEFAULT_KEY_INDEX;
 }
@@ -865,7 +866,7 @@ int pft_inode_create(struct inode *dir, struct dentry *dentry, umode_t mode)
 		/* At this state no new encrypted files can be created */
 		if (pft_is_current_process_registered()) {
 			pr_debug("key removed, registered uid %u is denied from creating new file %s\n",
-				current_uid(), dentry->d_iname);
+				from_kuid_munged(current_user_ns(), current_uid()), dentry->d_iname);
 			return -EACCES;
 		}
 		break;
@@ -918,7 +919,7 @@ int pft_inode_post_create(struct inode *dir, struct dentry *dentry,
 			ret = pft_tag_file(dentry, key_index);
 			if (ret == 0)
 				pr_debug("key loaded, pid [%u] uid [%d] is creating file %s\n",
-					 current_pid(), current_uid(),
+					 current_pid(), from_kuid_munged(current_user_ns(), current_uid()),
 					 dentry->d_iname);
 			else {
 				pr_err("Failed to tag file %s by pid %d\n",
@@ -990,13 +991,16 @@ int pft_inode_rename(struct inode *inode, struct dentry *dentry,
 
 	if (pft_is_inplace_inode(dentry->d_inode)) {
 		pr_err("access in-place-encryption file %s by uid [%d] pid [%d] is blocked.\n",
-		       inode_to_filename(inode), current_uid(), current_pid());
+		       inode_to_filename(inode),
+			from_kuid_munged(current_user_ns(), current_uid()),
+			current_pid());
 		return -EACCES;
 	}
 
 	if (!pft_is_current_process_registered()) {
 		pr_err("unregistered app (uid %u pid %u) is trying to access encrypted file %s\n",
-		       current_uid(), current_pid(), dentry->d_iname);
+			from_kuid_munged(current_user_ns(), current_uid()),
+			current_pid(), dentry->d_iname);
 		return -EACCES;
 	} else
 		pr_debug("rename file %s\n", dentry->d_iname);
@@ -1042,7 +1046,9 @@ int pft_file_open(struct file *filp, const struct cred *cred)
 	 */
 	if (pft_is_inplace_file(filp) && current_pid() != pft_dev->pfm_pid) {
 		pr_err("Access in-place-encryption file %s by uid %d pid %d is blocked.\n",
-			 file_to_filename(filp), current_uid(), current_pid());
+			file_to_filename(filp),
+			from_kuid_munged(current_user_ns(), current_uid()),
+			current_pid());
 		return -EACCES;
 	}
 
@@ -1053,14 +1059,15 @@ int pft_file_open(struct file *filp, const struct cred *cred)
 	case PFT_STATE_REMOVING_KEY:
 		/* Block any access for encrypted files when key not loaded */
 		pr_debug("key not loaded. uid (%u) can not access file %s\n",
-			 current_uid(), file_to_filename(filp));
+			from_kuid_munged(current_user_ns(), current_uid()),
+			file_to_filename(filp));
 		return -EACCES;
 	case PFT_STATE_KEY_LOADED:
 		 /* Only registered apps may access encrypted files. */
 		if (!pft_is_current_process_registered()) {
 			pr_err("unregistered app (uid %u pid %u) is trying to access encrypted file %s\n",
-			       current_uid(), current_pid(),
-			       file_to_filename(filp));
+				from_kuid_munged(current_user_ns(), current_uid()),
+				current_pid(), file_to_filename(filp));
 			return -EACCES;
 		}
 
@@ -1114,13 +1121,15 @@ int pft_file_permission(struct file *filp, int mask)
 		if (current_pid() == pft_dev->pfm_pid) {
 			/* mask MAY_WRITE=2 / MAY_READ=4 */
 			pr_debug("r/w [mask 0x%x] in-place-encryption file %s by PFM (UID %d, PID %d).\n",
-				 mask, file_to_filename(filp),
-				 current_uid(), current_pid());
+				mask, file_to_filename(filp),
+				from_kuid_munged(current_user_ns(), current_uid()),
+				current_pid());
 			return 0;
 		} else {
 			pr_err("Access in-place-encryption file %s by App (UID %d, PID %d) is blocked.\n",
-			       file_to_filename(filp),
-			       current_uid(), current_pid());
+				file_to_filename(filp),
+				from_kuid_munged(current_user_ns(), current_uid()),
+				current_pid());
 			return -EACCES;
 		}
 	}
@@ -1132,14 +1141,15 @@ int pft_file_permission(struct file *filp, int mask)
 	case PFT_STATE_REMOVING_KEY:
 		/* Block any access for encrypted files when key not loaded */
 		pr_debug("key not loaded. uid (%u) can not access file %s\n",
-			 current_uid(), file_to_filename(filp));
+			from_kuid_munged(current_user_ns(), current_uid()),
+			file_to_filename(filp));
 		return -EACCES;
 	case PFT_STATE_KEY_LOADED:
 		 /* Only registered apps can access encrypted files. */
 		if (!pft_is_current_process_registered()) {
 			pr_err("unregistered app (uid %u pid %u) is trying to access encrypted file %s\n",
-			       current_uid(), current_pid(),
-			       file_to_filename(filp));
+				from_kuid_munged(current_user_ns(), current_uid()),
+				current_pid(), file_to_filename(filp));
 			return -EACCES;
 		}
 		break;
@@ -1197,7 +1207,9 @@ int pft_file_close(struct file *filp)
 
 	if (pft_is_inplace_file(filp)) {
 		pr_debug("pid [%u] uid [%u] is closing in-place-encryption file %s\n",
-			 current_pid(), current_uid(), file_to_filename(filp));
+			current_pid(),
+			from_kuid_munged(current_user_ns(), current_uid()),
+			file_to_filename(filp));
 		pft_dev->inplace_file = NULL;
 	}
 
@@ -1257,13 +1269,16 @@ int pft_inode_unlink(struct inode *dir, struct dentry *dentry)
 
 	if (pft_is_inplace_inode(inode)) {
 		pr_err("block delete in-place-encryption file %s by uid [%d] pid [%d], while encryption in progress.\n",
-		       inode_to_filename(inode), current_uid(), current_pid());
+			inode_to_filename(inode),
+			from_kuid_munged(current_user_ns(), current_uid()),
+			current_pid());
 		return -EBUSY;
 	}
 
 	if (!pft_is_current_process_registered()) {
 		pr_err("unregistered app (uid %u pid %u) is trying to access encrypted file %s\n",
-		       current_uid(), current_pid(), inode_to_filename(inode));
+			from_kuid_munged(current_user_ns(), current_uid()),
+			current_pid(), inode_to_filename(inode));
 		return -EACCES;
 	} else
 		pr_debug("delete file %s\n", inode_to_filename(inode));
