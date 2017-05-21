@@ -38,6 +38,7 @@ extra-y += $(call logo-cfiles,_clut224,ppm)
 extra-y += $(call logo-cfiles,_gray256,pgm)
 
 pnmtologo := scripts/pnmtologo
+$(pnmtologo): $(objtree)/scripts/pnmtologo.c
 
 # Create commands like "pnmtologo -t mono -n logo_mac_mono -o ..."
 quiet_cmd_logo = LOGO    $@
