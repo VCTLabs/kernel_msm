@@ -19,6 +19,18 @@ obj-$(CONFIG_ARCH_MSM8909)	+= clock-gcc-8909.o
 obj-$(CONFIG_ARCH_MDMFERRUM)	+= clock-rpm-8909.o
 obj-$(CONFIG_ARCH_MDMFERRUM)	+= clock-gcc-8909.o
 
+# MSM8974
+obj-$(CONFIG_ARCH_MSM8974) += clock-rpm-8974.o
+obj-$(CONFIG_ARCH_MSM8974) += clock-gcc-8974.o
+obj-$(CONFIG_ARCH_MSM8974) += clock-mmss-8974.o
+obj-$(CONFIG_ARCH_MSM8974) += clock-lpass-8974.o
+obj-$(CONFIG_ARCH_MSM8974) += clock-mdss-8974.o
+
+obj-$(CONFIG_ARCH_APQ8084) += clock-8084.o
+obj-$(CONFIG_ARCH_APQ8084) += clock-mdss-8974.o
+obj-$(CONFIG_ARCH_MSM8226) += clock-8226.o
+obj-$(CONFIG_ARCH_MSM8226) += clock-mdss-8974.o
+
 # MSM8994
 obj-$(CONFIG_ARCH_MSM8994)	+= clock-rpm-8994.o
 obj-$(CONFIG_ARCH_MSM8994)	+= clock-gcc-8994.o
