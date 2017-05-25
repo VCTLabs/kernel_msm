@@ -510,6 +510,17 @@ config USB_DWC3_OMAP
 	  the OMAP5 series of processors. More information about the OMAP5
 	  version of this controller, refer to http://www.ti.com/omap5.
 
+config USB_MSM_72K
+	tristate "MSM 72K Device Controller"
+	depends on ARCH_MSM
+	help
+	   USB gadget driver for Qualcomm MSM 72K architecture.
+	   (for use with kgdb over USB/ADB cable)
+
+	   Say "y" to link the driver statically, or "m" to build a
+	   dynamically linked module called "msm72k" and force all
+	   gadget drivers to also be dynamically linked.
+
 #
 # LAST -- dummy/emulated controller
 #
