@@ -69,6 +69,22 @@
 #define PORTSC_CSC              (1 << 1)
 #define PORTSC_CCS              (1 << 0)
 
+#ifdef CONFIG_USB_MSM_72K
+/* (old style) USB_PORTSC bits for determining port speed */
+#define PORTSC_PSPD_FS        (0 << 26)
+#define PORTSC_PSPD_LS        (1 << 26)
+#define PORTSC_PSPD_HS        (2 << 26)
+#define PORTSC_PSPD_MASK      (3 << 26)
+
+enum chg_type {
+	USB_CHG_TYPE__SDP,
+	USB_CHG_TYPE__CARKIT,
+	USB_CHG_TYPE__WALLCHARGER,
+	USB_CHG_TYPE__INVALID
+};
+
+#endif
+
 #define USB_ULPI_VIEWPORT    (MSM_USB_BASE + 0x0170)
 #define ULPI_RUN              (1 << 30)
 #define ULPI_WRITE            (1 << 29)
