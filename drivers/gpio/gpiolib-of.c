@@ -77,7 +77,8 @@ int of_get_named_gpio_flags(struct device_node *np, const char *propname,
 	ret = of_parse_phandle_with_args(np, propname, "#gpio-cells", index,
 					 &gg_data.gpiospec);
 	if (ret) {
-		pr_debug("%s: can't parse gpios property\n", __func__);
+		pr_debug("%s: can't parse '%s' property of node '%s[%d]'\n",
+			__func__, propname, np->full_name, index);
 		return ret;
 	}
 
@@ -85,7 +86,8 @@ int of_get_named_gpio_flags(struct device_node *np, const char *propname,
 
 	of_node_put(gg_data.gpiospec.np);
 	if (IS_ERR_VALUE(gg_data.out_gpio))
-		pr_debug("%s exited with status %d\n", __func__,
+		pr_debug("%s: parsed '%s' property of node '%s[%d]' - status (%d)\n",
+			__func__, propname, np->full_name, index,
 			 gg_data.out_gpio);
 	return gg_data.out_gpio;
 }
