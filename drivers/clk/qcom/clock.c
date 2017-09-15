@@ -954,25 +954,33 @@ static int __init clock_late_init(void)
 
 	list_for_each_entry_safe(initdata, initdata_temp,
 					&initdata_list, list) {
+		pr_info("%s: calling late_init @ %p\n", __func__, initdata->late_init);
 		ret = initdata->late_init();
 		if (ret)
 			pr_err("%s: %pS failed late_init.\n", __func__,
 				initdata);
+		pr_info("%s: called late_init @ %p\n", __func__, initdata->late_init);
 	}
 
 	list_for_each_entry_safe(h, h_temp, &handoff_list, list) {
+		pr_info("%s: calling clk_disable_unprepare on %p\n", __func__, h->clk);
 		clk_disable_unprepare(h->clk);
 		list_del(&h->list);
 		kfree(h);
+		pr_info("%s: called clk_disable_unprepare on %p\n", __func__, h->clk);
 	}
 
 	list_for_each_entry_safe(v, v_temp, &handoff_vdd_list, list) {
+		pr_info("%s: calling unvote_vdd_level on %p\n", __func__, v->vdd_class);
 		unvote_vdd_level(v->vdd_class, v->vdd_class->num_levels - 1);
 		list_del(&v->list);
 		kfree(v);
+		pr_info("%s: called unvote_vdd_level on %p\n", __func__, v->vdd_class);
 	}
 
+	pr_info("%s: Unlock clock mutex\n", __func__);
 	mutex_unlock(&msm_clock_init_lock);
+	pr_info("%s: Done with clock init\n", __func__);
 
 	return ret;
 }
