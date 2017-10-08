@@ -552,7 +552,7 @@ static inline void krait_force_pmu_reset(void *info)
 {
 }
 
-inline void msm_perf_register_l2_reset_callback(void (*reset_l2_pmu))
+static inline void msm_perf_register_l2_reset_callback(void (*reset_l2_pmu))
 {
 }
 #endif

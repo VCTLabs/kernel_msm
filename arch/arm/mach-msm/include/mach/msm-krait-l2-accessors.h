@@ -63,7 +63,13 @@
 
 #define RESRX_VALUE_EN	0x80000000
 
+#ifdef CONFIG_PERF_EVENTS_RESET_PMU_DEBUGFS
 extern void msm_perf_register_l2_reset_callback(void (*reset_l2_pmu));
+#else
+static inline void msm_perf_register_l2_reset_callback(void (*reset_l2_pmu))
+{
+}
+#endif
 #ifdef CONFIG_ARCH_MSM_KRAIT
 extern void set_l2_indirect_reg(u32 reg_addr, u32 val);
 extern u32 get_l2_indirect_reg(u32 reg_addr);
