@@ -776,8 +776,6 @@ static int msm_isp_send_hw_cmd(struct vfe_device *vfe_dev,
 				return -EINVAL;
 			*data_ptr++ = msm_camera_io_r(vfe_dev->vfe_base +
 				reg_cfg_cmd->u.rw_info.reg_offset);
-				reg_cfg_cmd->u.rw_info.reg_offset += 4;
-		}
 			reg_cfg_cmd->u.rw_info.reg_offset += 4;
 		}
 		break;
