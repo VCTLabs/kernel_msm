@@ -51,6 +51,7 @@ static char rt_ert_flag;
 static char formatting_dir;
 static unsigned char sig_blend = CTRL_ON;
 static DEFINE_MUTEX(iris_fm);
+static int transport_ready = -1;
 
 module_param(rds_buf, uint, 0);
 MODULE_PARM_DESC(rds_buf, "RDS buffer entries: *100*");
@@ -4312,7 +4313,14 @@ static int iris_vidioc_s_ctrl(struct file *file, void *priv,
 		break;
 	case V4L2_CID_PRIVATE_IRIS_RIVA_ACCS_LEN:
 		if (is_valid_peek_len(ctrl->value)) {
+		if ((ctrl->value > 0) &&
+			(ctrl->value <= MAX_RIVA_PEEK_RSP_SIZE)) {
 			radio->riva_data_req.cmd_params.length = ctrl->value;
+		} else {
+			FMDERR("Length %d is more than the buffer size %d\n",
+			ctrl->value, MAX_RIVA_PEEK_RSP_SIZE);
+			retval = -EINVAL;
+		}
 		} else {
 			retval = -EINVAL;
 			FMDERR("%s: riva access len is not valid\n", __func__);
@@ -5220,6 +5228,16 @@ static const struct v4l2_ioctl_ops iris_ioctl_ops = {
 	.vidioc_g_ext_ctrls           = iris_vidioc_g_ext_ctrls,
 };
 
+#ifndef MODULE
+extern int radio_hci_smd_init(void);
+static int iris_fops_open(struct file *f) {
+	if (transport_ready < 0) {
+		transport_ready =  radio_hci_smd_init();
+	}
+        return transport_ready;
+}
+#endif
+
 static const struct v4l2_file_operations iris_fops = {
 	.owner = THIS_MODULE,
 	.unlocked_ioctl = video_ioctl2,
@@ -5227,6 +5245,9 @@ static const struct v4l2_file_operations iris_fops = {
 	.compat_ioctl32 = v4l2_compat_ioctl32,
 #endif
 	.release        = iris_fops_release,
+#ifndef MODULE
+	.open           = iris_fops_open,
+#endif
 };
 
 static struct video_device iris_viddev_template = {

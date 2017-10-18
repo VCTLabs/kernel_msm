@@ -20,6 +20,9 @@ obj-$(CONFIG_MSM_PCIE) += pcie.o pcie_irq.o pcie_phy.o
 obj-$(CONFIG_MSM_DMA_TEST) += dma_test.o
 obj-$(CONFIG_SURF_FFA_GPIO_KEYPAD) += keypad-surf-ffa.o
 
+ifndef CONFIG_MACH_MSM8974_HAMMERHEAD
+obj-$(CONFIG_ARCH_MSM8974) += board-8974.o board-8974-gpiomux.o
+endif
 obj-$(CONFIG_ARCH_FSM9900) += board-fsm9900.o board-fsm9900-gpiomux.o
 obj-$(CONFIG_ARCH_FSM9900) += clock-fsm9900.o
 obj-$(CONFIG_ARCH_FSM9900) += rfic-fsm9900.o bbif-fsm9900.o
