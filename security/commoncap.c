@@ -26,6 +26,7 @@
 #include <linux/mount.h>
 #include <linux/sched.h>
 #include <linux/prctl.h>
+#include <linux/uidgid.h>
 #include <linux/securebits.h>
 #include <linux/user_namespace.h>
 #include <linux/binfmts.h>
